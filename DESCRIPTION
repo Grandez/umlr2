@@ -1,0 +1,17 @@
+Package: plantumlr
+Title: A Wraper for use PlantUML into RMarkdown documents
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Javier",
+           family = "Gonzalez",
+           role = c("aut", "cre"),
+           email = "javier.gonzalez@outlook.es",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE, r6 = FALSE)
+RoxygenNote: 7.1.1

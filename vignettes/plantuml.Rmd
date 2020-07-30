@@ -1,0 +1,35 @@
+---
+title: "PlantUML in R"
+author: "Grandez"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"PlantUML in R"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Pagina oficial: [plantUML](https://plantuml.com)
+
+PlantUML es un proyecto Open Source desarrollado en Java para generar diagramas UML a partir de una descripcion de los mismos en formato texto.
+
+Su forma de invocación general es:
+
+```java -jar plantuml.jar [options] file1 file2 file3```
+
+Lo cual implica que, desde el punto de vista de la generación de documentos basados en RMarkdown, es necesario invocar al Sistema nativo donde se está generando la documentación y tener instalados y configurados los siguientes componentes:
+
+- Java JRE: https://www.java.com/es/download/ o https://openjdk.java.net/
+- plantuml.jar: 
+- graphviz: https://graphviz.org/
+
+plantUML permite una gran customizacion en el procesamiento de cada grafico mediante parametros especificados de diferentes formas:
+
+1. -DVAR1=value1
+2. -I/path/to/file
+3. -param value
+4. -param
