@@ -4,14 +4,14 @@ author: "Grandez"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"Caching diagrams"}
+  %\VignetteIndexEntry{Caching diagrams}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-source("../R/plantumlr.R")
+source("../R/R6PlantUML.R")
 ```
 
 Invocar a una maquina virtual Java cada vez que se procesa el documento puede ser muy costoso en tiempo de ejecución, e innecesario si se conoce de antemano que el diagrama a generar no ha cambiado desde la ultima ejecución.
@@ -29,111 +29,112 @@ La gestión de la caché se realiza a través del atributo `force` que por defec
 
 Adicionalmente, todos los metodos de generación de diagramas aceptan el mismo parametro: `force`. Cuando se utiliza, este tiene prioridad sobre el valor global y se aplica unicamente a esa invocacion.
 
-````
-`r ''````{r, eval=TRUE}
-1 + 1
-```
-````
 
-
-
-```{r initTestDoc, echo = FALSE}
-   plant = PLANTUML$new()
-   testData="@startuml
-               [*]-->STATE1
-             @enduml
-            "
-```
-
-   
-````
-...
-
-`r ''````{r, eval=TRUE}
-   plant = PLANTUML$new()
-   testData="@startuml
-               [*]-->STATE1
-             @enduml
-            "
-            
-...
-
-````
-
-El objeto `plant` tiene desactivado el flag _force_
-
-
-```{r}
-  plant$force
-```
-
-````
-`r ''````{r}
-   plant$plot(testData)
-```
-
-````
-
-Como el diagrama se genera a partir de una variable y no se almacena en disco, este codigo se ejecutará siempre
-
-
-````
-`r ''````{r, cache=TRUE}
-
-   plant$plot(testData)
-```
-
-````
-
-Si `knitr` detecta que la variable no ha cambiado utilizará la imagen almacenada en su caché
-
-````
-
-...
-
-`r ''````{r, eval=TRUE}
-   plant = PLANTUMLR$new()
-   testData="@startuml
-               [*]-->STATE1
-             @enduml
-            "
-
-   # plant tiene activado el flag _force_
-```
-...
-
-`r ''````{r, eval=TRUE}
-   plant$plot(testData)
-```
-
-````
-
-Probando
-
-```
- testData="@startuml
-          [*]-->STATE1
-          @enduml
-         "
-
-```
-
->   ```{r, echo=TRUE, eval=FALSE}
->      plant = PLANTUMLR$new()
->   ```
- 
-```{eval = FALSE}
-   ...
-   ```{r, echo=TRUE, eval=FALSE}
-      plant = PLANTUMLR$new()
-   ```
-   por defecto plant tiene activado el flag force
-   
-```
-```{r, eval=FALSE}
- testData="@startuml
-          [*]-->STATE1
-          @enduml
-         "
-
-```
+[//]: <> ````
+[//]: <> `r ''````{r, eval=TRUE}
+[//]: <> 1 + 1
+[//]: <> ```
+[//]: <> ````
+[//]: <> 
+[//]: <> 
+[//]: <> 
+[//]: <> ```{r initTestDoc, echo = FALSE}
+[//]: <>    plant = PLANTUML$new()
+[//]: <>    testData="@startuml
+[//]: <>                [*]-->STATE1
+[//]: <>              @enduml
+[//]: <>             "
+[//]: <> ```
+[//]: <> 
+[//]: <>    
+[//]: <> ````
+[//]: <> ...
+[//]: <> 
+[//]: <> `r ''````{r, eval=TRUE}
+[//]: <>    plant = PLANTUML$new()
+[//]: <>    testData="@startuml
+[//]: <>                [*]-->STATE1
+[//]: <>              @enduml
+[//]: <>             "
+[//]: <>             
+[//]: <> ...
+[//]: <> 
+[//]: <> ````
+[//]: <> 
+[//]: <> El objeto `plant` tiene desactivado el flag _force_
+[//]: <> 
+[//]: <> 
+[//]: <> ```{r}
+[//]: <>   plant$force
+[//]: <> ```
+[//]: <> 
+[//]: <> ````
+[//]: <> `r ''````{r}
+[//]: <>    plant$plot(testData)
+[//]: <> ```
+[//]: <> 
+[//]: <> ````
+[//]: <> 
+[//]: <> Como el diagrama se genera a partir de una variable y no se almacena en disco, este codigo se ejecutará siempre
+[//]: <> 
+[//]: <> 
+[//]: <> ````
+[//]: <> `r ''````{r, cache=TRUE}
+[//]: <> 
+[//]: <>    plant$plot(testData)
+[//]: <> ```
+[//]: <> 
+[//]: <> ````
+[//]: <> 
+[//]: <> Si `knitr` detecta que la variable no ha cambiado utilizará la imagen almacenada en su caché
+[//]: <> 
+[//]: <> ````
+[//]: <> 
+[//]: <> ...
+[//]: <> 
+[//]: <> `r ''````{r, eval=TRUE}
+[//]: <>    plant = PLANTUMLR$new()
+[//]: <>    testData="@startuml
+[//]: <>                [*]-->STATE1
+[//]: <>              @enduml
+[//]: <>             "
+[//]: <> 
+[//]: <>    # plant tiene activado el flag _force_
+[//]: <> ```
+[//]: <> ...
+[//]: <> 
+[//]: <> `r ''````{r, eval=TRUE}
+[//]: <>    plant$plot(testData)
+[//]: <> ```
+[//]: <> 
+[//]: <> ````
+[//]: <> 
+[//]: <> Probando
+[//]: <> 
+[//]: <> ```
+[//]: <>  testData="@startuml
+[//]: <>           [*]-->STATE1
+[//]: <>           @enduml
+[//]: <>          "
+[//]: <> 
+[//]: <> ```
+[//]: <> 
+[//]: <> >   ```{r, echo=TRUE, eval=FALSE}
+[//]: <> >      plant = PLANTUMLR$new()
+[//]: <> >   ```
+[//]: <>  
+[//]: <> ```{eval = FALSE}
+[//]: <>    ...
+[//]: <>    ```{r, echo=TRUE, eval=FALSE}
+[//]: <>       plant = PLANTUMLR$new()
+[//]: <>    ```
+[//]: <>    por defecto plant tiene activado el flag force
+[//]: <>    
+[//]: <> ```
+[//]: <> ```{r, eval=FALSE}
+[//]: <>  testData="@startuml
+[//]: <>           [*]-->STATE1
+[//]: <>           @enduml
+[//]: <>          "
+[//]: <> 
+[//]: <> ```

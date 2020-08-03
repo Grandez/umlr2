@@ -6,26 +6,38 @@ output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{"PlantUML in R"}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+source("../R/R6PlantUML.R")
+plant = PLANTUML$new( plantuml="E:\\SDK\\plantuml\\plantuml.jar",inputDir("uml"))
 ```
-
-Pagina oficial: [plantUML](https://plantuml.com)
 
 PlantUML es un proyecto Open Source desarrollado en Java para generar diagramas UML a partir de una descripcion de los mismos en formato texto.
 
+Pagina oficial: [plantUML](https://plantuml.com)
+
 Su forma de invocación general es:
 
-```java -jar plantuml.jar [options] file1 file2 file3```
+`java -jar plantuml.jar [options] file1 file2 file3`
 
-Lo cual implica que, desde el punto de vista de la generación de documentos basados en RMarkdown, es necesario invocar al Sistema nativo donde se está generando la documentación y tener instalados y configurados los siguientes componentes:
+donde `options` 
 
-- Java JRE: https://www.java.com/es/download/ o https://openjdk.java.net/
-- plantuml.jar: 
-- graphviz: https://graphviz.org/
+y su diagrama de bloques:
+
+```{r, fig.cap="diagrama de bloques"}
+plant$plot("plantuml")
+```
+
+Lo cual implica que:
+1. Desde el punto de vista de la generación de documentos basados en RMarkdown, es necesario invocar al Sistema nativo donde se está generando la documentación y tener instalados y configurados los siguientes componentes:
+
+    - Java JRE: https://www.java.com/es/download/ o https://openjdk.java.net/
+    - plantuml.jar: 
+    - graphviz: https://graphviz.org/
+2. PlantUML **lee** un fichero y **escribe** otro fichero^[Aunque PlantUML puede soportar _pipes_ esta opcion es problematica en documentos _markdown_]. Por lo que es necesario tener acceso al sistema de ficheros del sistema.
 
 plantUML permite una gran customizacion en el procesamiento de cada grafico mediante parametros especificados de diferentes formas:
 

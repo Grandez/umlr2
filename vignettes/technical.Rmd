@@ -1,0 +1,35 @@
+---
+title: "Architectural decisssions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Architectural decisssions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(plantumlr)
+```
+
+# Integracion continua
+
+Dado que el paquete necesita tener instalados en el sistema:
+
+- JRE
+- plantuml.jar
+- GraphViz
+
+**NO** es posible ejecutar todos los bloques de pruebas en entornos de Integracion continua por que no se puede garantizar la existencia de estos paquetes.
+
+Para solventar esto, al menos en esta version, se ha utilizado el siguiente _workaround_:
+
+- En el entorno de desarrollo se ha creado la variables de entorno: `PLANTUMLR_DEV=T`
+- A la hora de ejecutar los tests el sistema busca la existencia de esa variable **con ese valor**
+- Si existe se activan todos los tests, si no solo se ejecutaran los tests minimos
