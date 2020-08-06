@@ -10,7 +10,10 @@ Authors@R:
 Description: Class to mange UML diagrams generated using PlantUML project.
 Depends: 
    R (>= 4.0.0)
-Suggests: knitr, rmarkdown
+Suggests: 
+    knitr,
+    rmarkdown,
+    covr
 VignetteBuilder: knitr
 License: GPL-3
 Encoding: UTF-8
