@@ -9,7 +9,6 @@ readPlantUML = function(fileName=NULL) {
 
 #' Convert data, if possible, to a suitable PlantUML S3 Object
 #'
-#' @details Throw an plantUMLErr expection
 #' @param uml Data convertible to an String with a plantuml definition
 #' @return An PlantUML S3 object
 #' @export
@@ -18,7 +17,6 @@ as.plantuml = function(uml) {
 }
 
 #' plot a diagram definition using PlantUML package
-#' @family generics
 #' @param uml A file or string containing the UML definition
 #'            attribute class must set to PlantUML
 #' @method plot S3PlantUML

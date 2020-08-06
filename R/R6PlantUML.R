@@ -3,8 +3,9 @@
 #' @docType class
 #' @export
 #
-#' @import magick
+# #' @import magick
 #'
+library(R6)
 PLANTUML = R6::R6Class("R6PLANTUML",
    public = list(
        #' @field force Flag para forzar la recreación de diagramas
@@ -71,7 +72,7 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       #' @description Si es posible, convierte los datos pasados en una clase PLANTUML
       #'              Usado desde la funcion generica as.plantuml. **No invocar directamente**
       #' @family generics
-      #' @param data  Definicion del diagrama en formato texto
+      #' @param umlData  Definicion del diagrama en formato texto
       #' @return una clase S3PlantUML
       ,asS3PlantUML       = function(umlData = NULL) {
           if (is.null(umlData)) private$plantErr("R010")
@@ -229,26 +230,63 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       # Getters and setters
       #####################################################
 
+      #' @description Devuelve el nombre de la maquina virtual java
+      #' @family setters y getters
+      #' @return El nombre del ejecutable de la maquina virtual java
       ,getJVM       = function() private$cfg[["jvm"]]
+      #' @description Devuelve la ubicacion del archivo jar plantuml.jar
+      #' @family setters y getters
+      #' @return La ubicacion del archivo jar plantuml.jar
       ,getPlantUML  = function() private$cfg[["plantuml"]]
+      #' @description Devuelve la ubicacion del directorio por defecto de las definiciones de diagramas
+      #' @family setters y getters
+      #' @return La ubicacion del directorio por defecto de las definiciones de diagramas
       ,getInputDir  = function() private$cfg[["inputDir"]]
+      #' @description Devuelve la ubicacion del directorio por defecto para almacenar los ficheros de diagramas
+      #' @family setters y getters
+      #' @return La ubicacion del directorio por defecto para almacenar los ficheros de diagramas
       ,getOutputDir = function() private$cfg[["outputDir"]]
+      #' @description Devuelve la extensión por defecto para almacenar los ficheros de diagramas
+      #' @family setters y getters
+      #' @return La extensión por defecto para almacenar los ficheros de diagramas
       ,getExt       = function() private$cfg[["ext"]]
+      #' @description Devuelve el tipo de grafico por defecto
+      #' @family setters y getters
+      #' @return El tipo de grafico por defecto
       ,getType      = function() private$cfg[["type"]]
+      #' @description Devuelve el juego de caracteres por defecto
+      #' @family setters y getters
+      #' @return El juego de caracteres por defecto
       ,getCharset   = function() private$cfg[["charset"]]
-      #' Establece la propiedad JVM
+      #' @description Establece la maquina virtual Java a utilizar
       #' @param value nombre de la maquina virtual
       ,setJVM       = function(value) { private$cfg["jvm"]      = private$checkString(value); invisible(self) }
+      #' @description Establece el paquete plantuml.jar a utilizar
+      #' @param value el paquete plantuml.jar a utilizar
       ,setPlantUML  = function(value) { private$cfg["plantuml"] = private$checkString(value); invisible(self) }
+      #' @description Establece la extension por defecto para los ficheros de definicion de diagramas
+      #'              Se ignora si el fichero en si mismo tiene extension
+      #' @param value El paquete plantuml.jar a utilizar
       ,setExt       = function(value) { private$cfg["ext"]      = private$checkString(value); invisible(self) }
+      #' @description Establece el juego de caracteres por defecto
+      #' @param value El juego de caracteres por defecto
       ,setCharset   = function(value) { private$cfg["charset"]  = private$checkString(value); invisible(self) }
+      #' @description Establece el tipo de grafico por defecto
+      #'              Valores permitidos: png, svg, png
+      #' @param value El tipo de grafico por defecto
       ,setType      = function(value) {
         private$checkString(value)
         private$checkType(value)
         private$cfg["type"] = value
         invisible(self)
       }
+      #' @description Establece directorio por defecto donde buscar los ficheros de diagramas
+      #'              Puede ser relativo o absoluto
+      #' @param value El directorio por defecto donde buscar los ficheros de diagramas
       ,setInputDir  = function(value=NULL) { private$cfg["inputDir"] = private$checkDir(value); invisible(self) }
+      #' @description Establece directorio por defecto donde almacenar los diagramas
+      #'              Puede ser relativo o absoluto
+      #' @param value El directorio por defecto donde almacenar los diagramas
       ,setOutputDir = function(value=NULL) { private$cfg["outputDir"]= private$checkDir(value); invisible(self) }
    )
    ,private = list(

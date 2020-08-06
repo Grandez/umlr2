@@ -19,3 +19,54 @@ library(plantumlr)
 ```
 
 En este documento se indican detalles de codificacion y de arquitectura 
+
+# Decisiones
+
+## parametro `force`
+
+El parametro force se ha puesto publico para evitar teclear demasiado.
+Se considera suficientemente simple y fijo como para mantenerlo asi
+
+## Lectura de ficheros graficos: magick
+
+Existen paquetes para leer ficheros png, otras para jpg, etc.
+El paquete Magick permite leer estos formatos automaticamente con lo que solo necesitamos un paquete.
+Por otro lado, este paquete permite recuperar la imagen generada y seguir trabajando en ella.
+
+## Pruebas unitarias
+
+Dado que el paquete se integra con una libreria Java que ademas invoca un producto externo, no podemos lanzar todos los test en un entorno de integracion continua por que no disponen de esos paquetes.
+
+Por lo tanto hay dos conjuntos de pruebas unitarias:
+
+- Unas comunes para los entornos de integracion y de despliegue
+- Unas locales para los entornos de desarrollo donde si se prueba todo el paquete
+
+Para simplificar este proceso se ha optado por chequear una variable de entorno en el sistema:
+
+**PLANTUMLR_DEV = T**
+
+Si existe, se asume entorno local y se ejecutan todos los tests.
+
+# Tareas pendientes
+
+Cosas a hacer en las proximas versiones
+
+## parametro force
+
+Revisar si es necesario o no
+
+## paquete rjava
+
+Si incluimos el paquete rjava se puede ahorrar tiempo al no tener que ejecutar una jvm cada vez
+
+## opciones e includes
+
+Mirar si tiene sentido dar soporte a ciertas opciones, los defines y los includes
+
+## Parsear fichero
+
+Incluir de manera automatica los flags de startuml y enduml
+Chequear que no existe la directiva filename
+etc.
+

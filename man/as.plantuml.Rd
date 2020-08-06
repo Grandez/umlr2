@@ -15,6 +15,3 @@ An PlantUML S3 object
 \description{
 Convert data, if possible, to a suitable PlantUML S3 Object
 }
-\details{
-Throw an plantUMLErr expection
-}

@@ -13,8 +13,3 @@ attribute class must set to PlantUML}
 \description{
 plot a diagram definition using PlantUML package
 }
-\seealso{
-Other generics: 
-\code{\link{PLANTUML}}
-}
-\concept{generics}
