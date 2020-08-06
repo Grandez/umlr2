@@ -4,13 +4,13 @@
 \alias{readPlantUML}
 \title{Read a text file containing an UML definition according PlantUML tool}
 \usage{
-readPlantUML(fileName)
+readPlantUML(fileName = NULL)
 }
 \arguments{
 \item{fileName}{The file to read}
 }
 \value{
-An PlantUML S3 object
+A PlantUML object
 }
 \description{
 Read a text file containing an UML definition according PlantUML tool

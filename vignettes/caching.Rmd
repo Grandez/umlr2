@@ -1,140 +1,35 @@
 ---
-title: "Caching diagrams"
-author: "Grandez"
-date: "`r Sys.Date()`"
+title: "Caching diagramas"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Caching diagrams}
+  %\VignetteIndexEntry{Caching diagramas}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-source("../R/R6PlantUML.R")
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 ```
 
-Invocar a una maquina virtual Java cada vez que se procesa el documento puede ser muy costoso en tiempo de ejecución, e innecesario si se conoce de antemano que el diagrama a generar no ha cambiado desde la ultima ejecución.
+```{r setup}
+library(plantumlr)
+```
 
-Para evitar esta situacion la clase implementa dos metodos:
+Invocar a una maquina virtual Java cada vez que se procesa el documento puede ser muy costoso en tiempo de ejecución, e innecesario si se conoce que el diagrama a generar no ha cambiado desde la ultima ejecución.
 
-1. opcion `cache=TRUE` de RMarkdown
-2. Verificacion de las fechas de generacion
+Para evitar esta situación la clase implementa dos métodos:
 
-En la primera opcion, el mecanismo de caché es delegado en knitr. Este metodo es util cuando el diagrama se genera dinamicamente en el codigo
+1. Vía RMarkdown a través de la opción `cache=TRUE`
+2. Vía la propia clase a través del atributo publico `force`
+3. Vía invocación concreta a través del parámetro `force`
 
-La segunda opcion se puede aplicar cuando el el diagrama es generado a partir de un fichero fuente y la imagen es almacenada en el sistema de archivos; es decir, cuando disponemos de un archivo fuente y un archivo destino sobre el que verificar los tiempos de modificacion.
+En la primera opción, el mecanismo de caché es delegado en knitr. Este método es útil cuando el diagrama se genera dinamicamente en el código
 
-La gestión de la caché se realiza a través del atributo `force` que por defecto se establece a TRUE.
+Las siguientes opciones solo aplican si el diagrama se esta generando usando un fichero de entrada y generando un fichero de salida; es decir, cuando disponemos de un método para verificar las fechas de modificación de ambos archivos.
 
-Adicionalmente, todos los metodos de generación de diagramas aceptan el mismo parametro: `force`. Cuando se utiliza, este tiene prioridad sobre el valor global y se aplica unicamente a esa invocacion.
+La gestión de la caché se realiza a través del atributo `force` que por defecto se establece a `TRUE`.
 
-
-[//]: <> ````
-[//]: <> `r ''````{r, eval=TRUE}
-[//]: <> 1 + 1
-[//]: <> ```
-[//]: <> ````
-[//]: <> 
-[//]: <> 
-[//]: <> 
-[//]: <> ```{r initTestDoc, echo = FALSE}
-[//]: <>    plant = PLANTUML$new()
-[//]: <>    testData="@startuml
-[//]: <>                [*]-->STATE1
-[//]: <>              @enduml
-[//]: <>             "
-[//]: <> ```
-[//]: <> 
-[//]: <>    
-[//]: <> ````
-[//]: <> ...
-[//]: <> 
-[//]: <> `r ''````{r, eval=TRUE}
-[//]: <>    plant = PLANTUML$new()
-[//]: <>    testData="@startuml
-[//]: <>                [*]-->STATE1
-[//]: <>              @enduml
-[//]: <>             "
-[//]: <>             
-[//]: <> ...
-[//]: <> 
-[//]: <> ````
-[//]: <> 
-[//]: <> El objeto `plant` tiene desactivado el flag _force_
-[//]: <> 
-[//]: <> 
-[//]: <> ```{r}
-[//]: <>   plant$force
-[//]: <> ```
-[//]: <> 
-[//]: <> ````
-[//]: <> `r ''````{r}
-[//]: <>    plant$plot(testData)
-[//]: <> ```
-[//]: <> 
-[//]: <> ````
-[//]: <> 
-[//]: <> Como el diagrama se genera a partir de una variable y no se almacena en disco, este codigo se ejecutará siempre
-[//]: <> 
-[//]: <> 
-[//]: <> ````
-[//]: <> `r ''````{r, cache=TRUE}
-[//]: <> 
-[//]: <>    plant$plot(testData)
-[//]: <> ```
-[//]: <> 
-[//]: <> ````
-[//]: <> 
-[//]: <> Si `knitr` detecta que la variable no ha cambiado utilizará la imagen almacenada en su caché
-[//]: <> 
-[//]: <> ````
-[//]: <> 
-[//]: <> ...
-[//]: <> 
-[//]: <> `r ''````{r, eval=TRUE}
-[//]: <>    plant = PLANTUMLR$new()
-[//]: <>    testData="@startuml
-[//]: <>                [*]-->STATE1
-[//]: <>              @enduml
-[//]: <>             "
-[//]: <> 
-[//]: <>    # plant tiene activado el flag _force_
-[//]: <> ```
-[//]: <> ...
-[//]: <> 
-[//]: <> `r ''````{r, eval=TRUE}
-[//]: <>    plant$plot(testData)
-[//]: <> ```
-[//]: <> 
-[//]: <> ````
-[//]: <> 
-[//]: <> Probando
-[//]: <> 
-[//]: <> ```
-[//]: <>  testData="@startuml
-[//]: <>           [*]-->STATE1
-[//]: <>           @enduml
-[//]: <>          "
-[//]: <> 
-[//]: <> ```
-[//]: <> 
-[//]: <> >   ```{r, echo=TRUE, eval=FALSE}
-[//]: <> >      plant = PLANTUMLR$new()
-[//]: <> >   ```
-[//]: <>  
-[//]: <> ```{eval = FALSE}
-[//]: <>    ...
-[//]: <>    ```{r, echo=TRUE, eval=FALSE}
-[//]: <>       plant = PLANTUMLR$new()
-[//]: <>    ```
-[//]: <>    por defecto plant tiene activado el flag force
-[//]: <>    
-[//]: <> ```
-[//]: <> ```{r, eval=FALSE}
-[//]: <>  testData="@startuml
-[//]: <>           [*]-->STATE1
-[//]: <>           @enduml
-[//]: <>          "
-[//]: <> 
-[//]: <> ```
+Adicionalmente se puede especificar el mismo atributo como parámetro del método. En este caso, el parámetro tiene prioridad sobre la configuración global  y se aplica únicamente a esa invocación.

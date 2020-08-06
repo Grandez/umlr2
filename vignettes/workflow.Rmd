@@ -1,8 +1,8 @@
 ---
-title: "Notas tecnicas"
+title: "Workflow with PlantUML"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Notas tecnicas}
+  %\VignetteIndexEntry{Workflow with PlantUML}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,4 +18,5 @@ knitr::opts_chunk$set(
 library(plantumlr)
 ```
 
-En este documento se indican detalles de codificacion y de arquitectura 
+
+La primera opcion es trabajar con el propio servidor de PlantUML: [Servidor](http://www.plantuml.com/plantuml)

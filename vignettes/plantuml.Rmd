@@ -12,7 +12,7 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 source("../R/R6PlantUML.R")
-plant = PLANTUML$new( plantuml="E:\\SDK\\plantuml\\plantuml.jar",inputDir("uml"))
+plant = PLANTUML$new() 
 ```
 
 PlantUML es un proyecto Open Source desarrollado en Java para generar diagramas UML a partir de una descripcion de los mismos en formato texto.
@@ -27,9 +27,9 @@ donde `options`
 
 y su diagrama de bloques:
 
-```{r, fig.cap="diagrama de bloques"}
+{r, fig.cap="diagrama de bloques"}
 plant$plot("plantuml")
-```
+
 
 Lo cual implica que:
 1. Desde el punto de vista de la generación de documentos basados en RMarkdown, es necesario invocar al Sistema nativo donde se está generando la documentación y tener instalados y configurados los siguientes componentes:
