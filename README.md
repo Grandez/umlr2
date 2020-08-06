@@ -7,6 +7,8 @@
 
 #### [![Build Status](https://travis-ci.org/Grandez/plantumlr.svg?branch=master)](https://travis-ci.org/Grandez/plantumlr)
 
+[![AppVeyor build
+status](https://ci.appveyor.com/api/projects/status/github/grandez/plantumlr?branch=master&svg=true)](https://ci.appveyor.com/project/grandez/plantumlr)
 <!-- badges: end -->
 
 The goal of plantumlr is to …
