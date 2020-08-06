@@ -1,5 +1,5 @@
 #' Setters y Getters
 #' @description Establece el valor correspondiente
-#' @param Valor del
+#' @param value valor a aplicar
 #' @name setters
 NULL

@@ -1,13 +1,13 @@
 Package: plantumlr
-Title: A Wraper for use PlantUML into RMarkdown documents
-Version: 0.0.0.9000
+Title: A class to integrate PlantUML diagrams into RMarkdown documents
+Version: 0.0.0.9004
 Authors@R: 
     person(given = "Javier",
            family = "Gonzalez",
            role = c("aut", "cre"),
            email = "javier.gonzalez@outlook.es",
            comment = c(ORCID = "0000-0003-2477-3203"))
-Description: What the package does (one paragraph).
+Description: Class to mange UML diagrams generated using PlantUML project
 Depends: 
    R (>= 4.0.0)
 Suggests: knitr, rmarkdown

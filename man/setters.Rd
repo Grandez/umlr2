@@ -4,7 +4,7 @@
 \alias{setters}
 \title{Setters y Getters}
 \arguments{
-\item{Valor}{del}
+\item{value}{valor a aplicar}
 }
 \description{
 Establece el valor correspondiente

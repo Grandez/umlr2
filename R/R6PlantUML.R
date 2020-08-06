@@ -7,25 +7,26 @@
 #'
 PLANTUML = R6::R6Class("R6PLANTUML",
    public = list(
-       #' @field force Flag para forzar la recreacion de diagramas
+       #' @field force Flag para forzar la recreación de diagramas
        force = FALSE
 
+       #####
        #' @description Crea una instancia de la clase PLANTUML
-       #' @details  detalles de la creacion
-       #' @param ...  named values para definir la configuracion
+       #' @param ...  named values para definir la configuración
        #' @return La instancia del objeto
        #'
        #' @examples
-       #' PLANTUML$new()
-       #'
+       #' plant = PLANTUML$new()
+       #' plant = PLANTUML$new(jvm='java')
+       #' plant = PLANTUML$new(c(jvm='java', plantuml='plantuml.jar'))
       ,initialize         = function( ...) {
           parms = unlist(list(...))
           if (sum(names(parms) == "") > 0) private$plantErr("R103")
           self$setConfig(parms)
       }
-      #' @description Genera un diagrama a partir de la definicion pasada
+      #' @description Genera un diagrama a partir de la definición pasada
       #' @family diagramas
-      #' @param data  Definicion del diagrama o fichero con la misma
+      #' @param data  Definición del diagrama o fichero con la misma
       #' @param type  Tipo de imagen. Defecto: png
       #' @details
       #'     - Si no se especifica type se asume el tipo de imagen definido en la instancia
@@ -46,6 +47,7 @@ PLANTUML = R6::R6Class("R6PLANTUML",
           makeFile = TRUE
           if (is.null(self$getOutputDir())) private$plantErr("R202")
           if (private$dataInline(data))     private$plantErr("R204")
+          if (is.null(force)) force = self$force
           if (!is.null(force) && !is.logical(force)) private$plantErr("R203")
 
           type    = self$getType()
@@ -100,7 +102,7 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       #'     Verifica la corrección de los datos de configuración de la clase.
       #'     Se recomienda su uso en desarrollo para verificar que los valores son correctos
       #'     El que indique que la configuracion es correcta no implica que el sistema funcione
-      #' @seealso [PLANTUML$checkInstallation()] para un chequeo completo
+      #' @seealso [checkInstallation()] para un chequeo completo
       #' @family verificacion
       #' @param verbose  Si TRUE muestra informacion de progreso por la consola
       #' @param first    Si TRUE se detiene en el primer error
@@ -227,7 +229,6 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       # Getters and setters
       #####################################################
 
-      #' @rdname getters
       ,getJVM       = function() private$cfg[["jvm"]]
       ,getPlantUML  = function() private$cfg[["plantuml"]]
       ,getInputDir  = function() private$cfg[["inputDir"]]
@@ -235,6 +236,8 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       ,getExt       = function() private$cfg[["ext"]]
       ,getType      = function() private$cfg[["type"]]
       ,getCharset   = function() private$cfg[["charset"]]
+      #' Establece la propiedad JVM
+      #' @param value nombre de la maquina virtual
       ,setJVM       = function(value) { private$cfg["jvm"]      = private$checkString(value); invisible(self) }
       ,setPlantUML  = function(value) { private$cfg["plantuml"] = private$checkString(value); invisible(self) }
       ,setExt       = function(value) { private$cfg["ext"]      = private$checkString(value); invisible(self) }
@@ -352,7 +355,7 @@ PLANTUML = R6::R6Class("R6PLANTUML",
 
           # Check for absolute path in nix and windows
           if (substring(data, 1,1) == "/") return(data)
-          if (nchar(data) > 1 && substring(data, 2,1) == ":")
+          if (nchar(data) > 1 && substring(data, 2,2) == ":")
               return(data)
 
           fullFile = data
@@ -379,7 +382,7 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       }
       ,fileChanged      = function(umlFile, imgFile) {
           if (!file.exists(imgFile)) return (TRUE)
-          file.info(umlFile)$ctime > file.info(imgFile)$ctime
+          file.info(umlFile)$mtime > file.info(imgFile)$mtime
       }
       ,checkJVM         = function() {
         rc = suppressWarnings(system2( self$getJVM()
