@@ -1,5 +1,5 @@
 #' La clase para interactuar con plantuml
-#'
+#' @title R6PlantUML
 #' @docType class
 #' @export
 #
