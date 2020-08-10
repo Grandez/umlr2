@@ -22,16 +22,35 @@ En este documento se indican detalles de codificacion y de arquitectura
 
 # Decisiones
 
+## Clases
+
+Se ha decidido separar la clase de PlantUML de la de generacion de diagramas de R para separar el codigo
+
+- PLANTUML es la clase encargada de generar los diagramas
+- UMLR     es la clase encargada de diagramar las clases R y hereda de PLANTUML
+
+Se deberia mirar si es mejor tener una clase base para plantuml y dos especializaciones:
+una para diagramas y su funcionalidad
+otra para diagramas directos de R
+Por que igual las utilidades de los diagramas no son necesarias en el codigo R
+
+HABRA QUE HACERLO
+
+la clase base se encarga de generar los diagramas sobre ficheros temporales
+
+
 ## parametro `force`
 
 El parametro force se ha puesto publico para evitar teclear demasiado.
 Se considera suficientemente simple y fijo como para mantenerlo asi
 
-## Lectura de ficheros graficos: magick
+## Lectura de ficheros graficos: magick y otros
 
 Existen paquetes para leer ficheros png, otras para jpg, etc.
-El paquete Magick permite leer estos formatos automaticamente con lo que solo necesitamos un paquete.
-Por otro lado, este paquete permite recuperar la imagen generada y seguir trabajando en ella.
+Esto se utilizó para no grabar las imagenes de diagramas, mas concretamente, dado que plantuml **siempre** genera un fichero, para procesarlo y borrarlo una vez hecho.
+El problema es que estos paquetes no gestionan bien el tamaño de los graficos, o al menos no he encontrado una manera correcta.
+
+Sin embargo, creando el link a la imagen esta se muestra correctamente. Por este motivo, **todos** los diagramas se almacenan en el disco. 
 
 ## Pruebas unitarias
 
@@ -47,26 +66,4 @@ Para simplificar este proceso se ha optado por chequear una variable de entorno 
 **PLANTUMLR_DEV = T**
 
 Si existe, se asume entorno local y se ejecutan todos los tests.
-
-# Tareas pendientes
-
-Cosas a hacer en las proximas versiones
-
-## parametro force
-
-Revisar si es necesario o no
-
-## paquete rjava
-
-Si incluimos el paquete rjava se puede ahorrar tiempo al no tener que ejecutar una jvm cada vez
-
-## opciones e includes
-
-Mirar si tiene sentido dar soporte a ciertas opciones, los defines y los includes
-
-## Parsear fichero
-
-Incluir de manera automatica los flags de startuml y enduml
-Chequear que no existe la directiva filename
-etc.
 

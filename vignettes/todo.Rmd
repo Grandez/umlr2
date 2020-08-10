@@ -1,0 +1,46 @@
+---
+title: "To Do"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{To Do}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(plantumlr)
+```
+
+# Tareas pendientes
+
+Cosas a hacer en las proximas versiones
+
+## Ficheros temporales
+
+Dado que todos los graficos se almaacenan en disco, podemos crear ficheros temporales que se borren al final.
+
+## parametro force
+
+Revisar si es necesario o no
+
+## paquete rjava
+
+Si incluimos el paquete rjava se puede ahorrar tiempo al no tener que ejecutar una jvm cada vez
+
+## opciones e includes
+
+Mirar si tiene sentido dar soporte a ciertas opciones, los defines y los includes
+
+## Parsear fichero
+
+Incluir de manera automatica los flags de startuml y enduml
+Chequear que no existe la directiva filename
+etc.
+

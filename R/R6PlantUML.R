@@ -1,8 +1,9 @@
 #' La clase para interactuar con plantuml
 #' @title R6PlantUML
 #' @docType class
+#' @description  La descripcion.
+#' @import R6
 #' @export
-#
 # #' @import magick
 #'
 library(R6)
@@ -25,80 +26,93 @@ PLANTUML = R6::R6Class("R6PLANTUML",
           if (sum(names(parms) == "") > 0) private$plantErr("R103")
           self$setConfig(parms)
       }
+      ,finalize = function() {
+          message("Cleaning up ")
+      }
       #' @description Genera un diagrama a partir de la definición pasada
-      #' @family diagramas
       #' @param data  Definición del diagrama o fichero con la misma
-      #' @param type  Tipo de imagen. Defecto: png
       #' @details
       #'     - Si no se especifica type se asume el tipo de imagen definido en la instancia
       #'     - El fichero con la imagen no se almacena en el sistema de archivos
-      ,plot               = function(data=NULL, type=NULL) {
-          if (is.null(type)) type = self$getType()
-          image = private$makeImage(data, type)
-          plot(as.raster(image))
+      ,plot               = function(data=NULL) {
+          imgFile = private$makeImage(data, self$getType())
+          knitr::include_graphics(imgFile)
       }
       #' @description Genera un link al fichero de imagen con el diagrama
-      #' @family diagramas
+      #' @seealso [plot()] para generacion en linea
+      #' @param data  Definicion del diagrama o fichero con la misma
+      #' @param caption Titulo de la imagen
+      #' @return la cadena del link
+      ,link              = function(data = NULL, caption = NULL) {
+        imgFile = private$makeImage(data, type)
+        target  = file.path(self$getOutputDir(), basename(imgFile))
+        paste0('[![', caption, "](", target, " \'", caption, "\')](https://127.0.0.1)")
+      }
+      #' @description Almacena el fichero de la imagen en el sistema de archivos
       #' @seealso [plot()] para generacion en linea
       #' @param data  Definicion del diagrama o fichero con la misma
       #' @param caption Titulo de la imagen
       #' @param force   Fuerza a regenerar el fichero
       #' @return la cadena del link
       ,file               = function(data=NULL, caption=NULL, force=NULL) {
-          makeFile = TRUE
-          if (is.null(self$getOutputDir())) private$plantErr("R202")
-          if (private$dataInline(data))     private$plantErr("R204")
-          if (is.null(force)) force = self$force
-          if (!is.null(force) && !is.logical(force)) private$plantErr("R203")
-
-          type    = self$getType()
-          umlFile = private$mountInputFile(data)
-          imgFile = private$mountOutputFile(umlFile, self$getOutputDir(), type)
-
-          if (!is.null(force) && !force)  {
-              makeFile = private$fileChanged(umlFile, imgFile)
-          }
-          outFile = file.path(self$getOutputDir(), basename(imgFile))
-          if (makeFile) private$callPlantUML(umlFile, dirname(imgFile), type)
-          paste0('![', caption, '](', outFile, ')')
-      }
-      #' @description Genera una imagen con el diagrama
-      #' @family diagramas
-      #' @param data  Definicion del diagrama o fichero con la misma
-      #' @return un objeto "magick" con la imagen
-      ,image              = function(data=NULL) {
-          private$makeImage(data, self$getType())
-      }
-      #' @description Si es posible, convierte los datos pasados en una clase PLANTUML
-      #'              Usado desde la funcion generica as.plantuml. **No invocar directamente**
-      #' @family generics
-      #' @param umlData  Definicion del diagrama en formato texto
-      #' @return una clase S3PlantUML
-      ,asS3PlantUML       = function(umlData = NULL) {
-          if (is.null(umlData)) private$plantErr("R010")
-          txt = umlData
-          if (is.list(txt)) txt = unlist(txt)
-          if (!is.character(txt)) private$plantErr("R011")
-          if (length(txt) > 1) txt = paste(txt, collapse="\n")
-          structure(txt, class="S3PlantUML")
+        private$makeImage(data, self$getType())
       }
       #' @description Carga un fichero de definicion de diagrama como clase S3PlantUML
       #' @family generics
       #' @param fileName  Path al fichero con la definicion
       #' @return una clase S3PlantUML
-      ,readPlantUML       = function(fileName=NULL) {
+      ,load             = function(fileName=NULL) {
           if (is.nul(fileName))        private$plantErr("E101", fileName)
           if (!file.exists(fileName))  private$plantErr("E101", fileName)
           tryCatch({
-             data = readLines(fileName)
-             structure(data, class = "S3PlantUML")
-          },error = function (e) {
-            private$plantErr("E102", fileName)
-          }
+              data = readLines(fileName)
+              structure(data, class = "S3PlantUML")
+            },error = function (e) {
+                 private$plantErr("E102", fileName)
+            }
           )
-         data = readLines(fileName)
-         structure(data, class = "S3PlantUML")
+          names(data) = strsplit(fileName, ".", fixed = TRUE)[[1]]
+          private$removeUmlTags(data)
       }
+
+      #' @description Devuelve un vector con el código de definición del diagrama
+      #' @param data  Definición del diagrama o fichero con la misma
+      #' @return el codigo de definición del diagrama
+      ,getDefinition = function(data=NULL) {
+          if (private$dataInline(data)) {
+              def = private$prepareData(data)
+              return (private$removeUmlTags(data))
+          }
+          self$load(data)
+      }
+      #' @description Si es posible, convierte los datos pasados en una clase PLANTUML
+      #'              Usado desde la funcion generica as.plantuml. **No invocar directamente**
+      #' @param umlData  Definicion del diagrama en formato texto
+      #' @return una clase S3PlantUML
+      ,asS3PlantUML       = function(umlData = NULL, name=NULL) {
+          if (is.null(umlData)) private$plantErr("R010")
+          txt = umlData
+          if (is.list(txt)) txt = unlist(txt)
+          if (!is.character(txt)) private$plantErr("R011")
+          txt = private$removeUmlTags(txt)
+          # if (length(txt) > 1) txt = paste(txt, collapse="\n")
+          # if (length(grep("@startuml", txt, fixed = TRUE)) == 0) {
+          #     txt = paste("@startuml \n", txt, "\n@enduml \n")
+          # }
+          if (length(names(umlData)) > 0) names(txt) = name
+          if (!is.null(name))             names(txt) = name
+          structure(txt, class="S3PlantUML")
+      }
+      #' @description Genera el diagrama de la clase pasada
+      ,plotClass             = function (object, full=FALSE, deep = FALSE) {
+          self$plot(self$umlClass(object,full, deep))
+      }
+      ,umlClass             = function (object, full=FALSE, deep = FALSE) {
+          if (isS4(object))            return (private$parseS4(object, full, deep))
+          if ("R6" %in% class(object)) return (private$parseR6(object, full, deep))
+          warning("'object' is not an instance of S4 or R6 Classes"))
+      }
+
       #' @description
       #'     Verifica la corrección de los datos de configuración de la clase.
       #'     Se recomienda su uso en desarrollo para verificar que los valores son correctos
@@ -146,7 +160,7 @@ PLANTUML = R6::R6Class("R6PLANTUML",
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msgErr["I016"], appendLF = FALSE)
-          dd = self$getInputDir()
+          dd = self$getUmlDir()
           rp = (!is.null(dd) && dir.exists(dd))
           if (verbose) message(ifelse (rp, "OK", "KO"))
           rc = rc && rp
@@ -241,11 +255,10 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       #' @description Devuelve la ubicacion del directorio por defecto de las definiciones de diagramas
       #' @family setters y getters
       #' @return La ubicacion del directorio por defecto de las definiciones de diagramas
-      ,getInputDir  = function() private$cfg[["inputDir"]]
-      #' @description Devuelve la ubicacion del directorio por defecto para almacenar los ficheros de diagramas
-      #' @family setters y getters
-      #' @return La ubicacion del directorio por defecto para almacenar los ficheros de diagramas
-      ,getOutputDir = function() private$cfg[["outputDir"]]
+      ,getUmlDir  = function(real = FALSE) {
+          if (!is.null(private$cfg[["umlDir"]]) || !real) return (private$cfg[["umlDir"]])
+          tempdir()
+      }
       #' @description Devuelve la extensión por defecto para almacenar los ficheros de diagramas
       #' @family setters y getters
       #' @return La extensión por defecto para almacenar los ficheros de diagramas
@@ -283,23 +296,18 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       #' @description Establece directorio por defecto donde buscar los ficheros de diagramas
       #'              Puede ser relativo o absoluto
       #' @param value El directorio por defecto donde buscar los ficheros de diagramas
-      ,setInputDir  = function(value=NULL) { private$cfg["inputDir"] = private$checkDir(value); invisible(self) }
-      #' @description Establece directorio por defecto donde almacenar los diagramas
-      #'              Puede ser relativo o absoluto
-      #' @param value El directorio por defecto donde almacenar los diagramas
-      ,setOutputDir = function(value=NULL) { private$cfg["outputDir"]= private$checkDir(value); invisible(self) }
+      ,setUmlDir  = function(value=NULL) {
+          private$cfg["umlDir"] = ifelse(is.null(value), NULL, private$checkString(value))
+          invisible(self)
+       }
    )
    ,private = list(
-       config = NULL
-      ,oldForce = NULL
-      ,tempFile = FALSE
-      ,cfg=list( jvm       = "java"
-                 ,plantuml  = "plantuml.jar"
-                 ,ext       = "uml"
-                 ,type      = "png"
-                 ,charset   = "utf-8"
-                 ,inputDir  = "."
-                 ,outputDir = NULL
+       cfg=list( jvm       = "java"
+                 ,plantuml = "plantuml.jar"
+                 ,ext      = "uml"
+                 ,type     = "png"
+                 ,charset  = "utf-8"
+                 ,umldir   = NULL
       )
       ,types  = c("png", "jpg", "svg")
       ,msgErr = c(
@@ -357,66 +365,69 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       }
       ,makeImage        = function(data,type) {
           umlFile = private$mountInputFile(data)
-          imgFile = private$mountOutputFile(umlFile, NULL, type)
-          rc      = private$callPlantUML(umlFile, dirname(imgFile), type)
-          if (rc != 0) {
-              private$restoreForce()
-              private$plantErr("E001", newCode=rc)
-          }
-          image = magick::image_read(imgFile)
-          file.remove(imgFile)
-          if (private$tempFile) {
-              file.remove(umlFile)
-              private$tempFile = FALSE
-          }
-          image
+          imgFile = gsub("\\..+$", paste0(".", type), umlFile)
+          private$callPlantUML(umlFile, type)
+          imgFile
       }
-      ,callPlantUML     = function(umlFile, outDir, type) {
+      ,callPlantUML     = function(umlFile, type) {
           # Si la llamada es correcta no informa status
           res = suppressWarnings( system2( self$getJVM()
                         ,c("-jar", self$getPlantUML()
                         ,paste0("-t", type)
-                        ,"-o", normalizePath(outDir)
+                        # ,"-o", normalizePath(outDir)
                         ,umlFile), stdout=TRUE, stderr=TRUE)
                 )
-          ifelse(is.null(attr(res, "status")), 0, attr(res, "status"))
+          rc = ifelse(is.null(attr(res, "status")), 0, attr(res, "status"))
+          if (rc != 0) {
+              private$plantErr("E001", newCode=rc)
+          }
       }
       ,mountInputFile   = function(data) {
-          private$tempFile = FALSE
+          inDir = self$getUmlDir(TRUE)
+
           if (is.null(data)) private$plantErr("R201")
           if (private$dataInline(data)) {
-              private$tempFile = TRUE
-              tmpFile = paste0(tempfile(), ".uml")
-              write(data, tmpFile)
-              return(tmpFile)
+              if (!is.null(names(data))) inFile = names(data)
+              if ( is.null(names(data))) inFile = basename(tempfile("pumld"))
+              inFile = file.path(inDir, inFile)
+              return (private$prepareFile(data, paste0(inFile, ".", self$getExt())))
           }
 
+          inFile = data
           # Check for absolute path in nix and windows
-          if (substring(data, 1,1) == "/") return(data)
-          if (nchar(data) > 1 && substring(data, 2,2) == ":")
-              return(data)
+          if (substring(inFile, 1,1) == "/") return(data)
+          if (nchar(inFile) > 1 && substring(inFile, 2,2) == ":") return(data)
 
-          fullFile = data
-          if (length(strsplit(fullFile, ".",fixed=TRUE)[[1]]) == 1 ) {
-              fullFile = paste(fullFile, self$getExt(), sep=".")
+          if (length(strsplit(inFile, ".",fixed=TRUE)[[1]]) == 1 ) {
+              inFile = paste(inFile, self$getExt(), sep=".")
           }
-          iDir = self$getInputDir()
-          if (!is.null(iDir)) fullFile = file.path(iDir, fullFile)
 
-          if (!file.exists(fullFile)) private$plantErr("R205")
-          fullFile
+          inFile = file.path(inDir, inFile)
+          if (!file.exists(inFile)) private$plantErr("R205")
+          inFile
       }
-      ,mountOutputFile  = function(umlFile, odir, ext) {
-          ff = strsplit(basename(umlFile), ".", fixed=TRUE)[[1]][1]
-          oDir = ifelse(is.null(odir), tempdir(), self$getOutputDir())
-          file.path(oDir, paste0(ff,".",ext))
-      }
+      # ,mountOutputFile  = function(umlFile, ext) {
+      #     ff = strsplit(basename(umlFile), ".", fixed=TRUE)[[1]][1]
+      #     file.path(self$getOutputDir(TRUE), paste0(ff,".",ext))
+      # }
       ,dataInline       = function(data) {
+         if (is.list(data))    return (TRUE)
+         if (length(data) > 1) return (TRUE)
          words = strsplit(data, " ")
          if (length(words[[1]]) > 1) return (TRUE)
          words = strsplit(data, "\n")
          if (length(words[[1]]) > 1) return (TRUE)
          FALSE
+      }
+      ,prepareFile      = function(data, fileName) {
+          txt = data
+          if(is.list(data)) txt = unlist(data)
+          if (length(txt) > 1) txt = paste(txt, collapse="\n")
+          if (length(grep("@startuml", txt, fixed = TRUE)) == 0) {
+              txt = paste("@startuml \n", txt, "\n@enduml \n")
+          }
+          writeLines(txt, fileName)
+          fileName
       }
       ,fileChanged      = function(umlFile, imgFile) {
           if (!file.exists(imgFile)) return (TRUE)
@@ -477,10 +488,10 @@ PLANTUML = R6::R6Class("R6PLANTUML",
           TRUE
       }
       ,restoreForce     = function() {
-         if (!is.null(private$oldForce)) {
-             self$force = private$oldForce
-             private$oldForce = NULL
-         }
+         # if (!is.null(private$oldForce)) {
+         #     self$force = private$oldForce
+         #     private$oldForce = NULL
+         # }
       }
       ,checkString      = function(value) {
           if (missing(value) || is.null(value))
@@ -492,12 +503,118 @@ PLANTUML = R6::R6Class("R6PLANTUML",
               private$plantErr("R006")
           trimmed
       }
-      ,checkDir         = function(value) {
-         if (is.null(value))  return (NULL)
-         private$checkString(value)
-      }
       ,checkType        = function (type) {
         if (!(type %in% private$types)) private$plantErr("R107")
+      }
+      ,parseS4 = function (object, full=FALSE, deep = FALSE) {
+      }
+      ,parseR6 = function (object, full=FALSE, deep = FALSE) {
+           #uml = ""
+           lista = list()
+           defs = private$getGenerators()  # Generadores
+           classes = class(object)
+           classes = classes[classes != "R6"]
+           inherits = private$getExtends(classes, defs, deep)
+           classBase = private$UMLClass(classes[1], full, defs)
+           if (deep && length(classes) > 1) {
+               lista = sapply(classes[-1], function(x) private$UMLClass(x, full, defs))
+           }
+           #uml = c(uml, paste("class", class(object)[1], "{"))
+           #data = capture.output(object)
+           #data = trimws(data)
+           c(classBase, unlist(lista), inherits)
+      }
+      ,getGenerators = function () {
+          vars = ls(globalenv())
+          classes = lapply(vars, function(x) eval(parse(text=paste0("class(",x,")"))))
+          names(classes) = vars
+          classes = unlist(classes)
+          c2 = classes[classes == "R6ClassGenerator"]
+          # Obtenemos la clase que genera
+          c2 = sapply(names(c2), function(x) eval(parse(text=paste0(x, "$classname"))), USE.NAMES=T)
+          # Cambiamos nombres por valores
+          nm = names(c2)
+          names(nm) = c2
+          nm
+      }
+      ,getExtends        = function (classes, defs, deep) {
+          if (length(classes) == 1) return ("")
+          cNames = defs[classes]
+          extend = c(paste(cNames[classes[2]], "<|--", cNames[classes[1]]))
+          if (deep && length(classes) > 2) {
+             rr = sapply(seq(2, length(classes) - 1), function(x)
+                    c(paste(cNames[classes[x+1]], "<|--", cNames[classes[x]])))
+          }
+          # if (!deep && length(classes) > 1) return (c(paste(classes[1], "<|--", classes[2])))
+          # for (i in 1:length(classes) - 1) {
+          #     extend = c(extend, paste(classes[i], "<|--", classes[i+1]))
+          # }
+          extend
+      }
+      ,UMLClass          = function (className, full, generators) {
+          attrPrivate = NULL
+          uml = c(paste("class", generators[className], "<<", className, ">> {"))
+          attrPublic  = private$getAttrs(generators[className], "public")
+          if (full) attrPrivate  = private$getAttrs(generators[className], "private")
+          if (!is.null(attrPublic$fields))   uml = c(uml, paste("+{field}",  attrPublic$fields))
+          if (!is.null(attrPrivate$fields))  uml = c(uml, paste("-{field}",  attrPrivate$fields))
+          if (!is.null(attrPublic$methods))  uml = c(uml, paste("+{method}", attrPublic$methods))
+          if (!is.null(attrPrivate$methods)) uml = c(uml, paste("-{method}", attrPrivate$methods))
+          c(uml, "}")
+      }
+      ,getAttrs  = function (className, visibility) {
+          data = list(fields = NULL, methods = NULL)
+          lFields  = eval(parse(text=paste0(className, "$", visibility, "_fields")))
+          lMethods = eval(parse(text=paste0(className, "$", visibility, "_methods")))
+          list(fields=names(lFields), methods=names(lMethods))
+      }
+      ,parseR62          = function (object, full=FALSE, deep = FALSE) {
+          priv = ""
+          pub = ""
+          uml = ""
+          data = capture.output(object)
+          data = trimws(data)
+          inherit = grep("Inherits[ \t]*", data, ignore.case = TRUE, value = TRUE)
+          if (length(inherit) > 0) {
+              uml = private$parseR6Parent(inherit)
+          }
+          uml = c(uml, paste("class", class(object)[1], "{"))
+          idxPublic  = grep("Public:" , data, ignore.case = TRUE)
+          idxPrivate = grep("Private:", data, ignore.case = TRUE)
+          if (idxPublic != 0) {
+              max = ifelse(idxPrivate > 0, idxPrivate - 1, length(data))
+              pub = private$extract(data[c((idxPublic + 1):max)],"+")
+          }
+          if (idxPrivate != 0 && full) {
+              priv = "__ Private Data __"
+              priv = c(priv, private$extract(data[c((idxPrivate + 1):length(data))],"-"))
+          }
+          uml = c(uml, pub, priv)
+          structure(c(uml, "}"), class="S3PlantUML")
+      }
+      ,extract          = function(data, type) {
+          attrs = grep("function", data, fixed=TRUE, value=TRUE, invert=TRUE)
+          attrs = gsub(":.*", "", attrs)
+
+          defs = grep("function", data, fixed=TRUE, value=TRUE)
+          defs = gsub(": function", "", defs)
+          c(paste0(type, attrs), "--", paste0(type, defs))
+      }
+      ,parseR6Parent    = function(txtParent) {
+          parent = trimws(gsub(">", "", gsub(".*<", "", txtParent)))
+          c(paste("class", parent, "{"), "}")
+          vars = ls()
+          classes = lapply(vars, function(x) eval(parse(text=paste0("class(",x,")"))))
+          names(classes) = vars
+
+      }
+      ,removeUmlTags   = function (data) {
+         # Es mas rapido obtener el indice que hacer una sustitucion
+         pos = grep("@startuml", data)
+         if (pos > 0) data[pos] = ""
+         pos = grep("@enduml", data)
+         if (pos > 0) data[pos] = ""
+         data
       }
    )
 )

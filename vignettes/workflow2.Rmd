@@ -1,8 +1,8 @@
 ---
-title: "Workflow con PlantUML en R"
+title: "Workflow with PlantUML"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Workflow}
+  %\VignetteIndexEntry{Workflow with PlantUML}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,66 +15,21 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
- #JGG No usamos la linreria para poder probar en desarrollo  
- # library(plantumlr)
+ library(plantumlr)
  source("../R/R6PlantUML.R")
  plant = PLANTUML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
 ```
 
-# Introduccion
 
-En este documento
-
-Si no se está habituado a la generación de diagramas con esta herramienta, o incluso si sí, la primera opción debería ser trabajar con el propio servidor de PlantUML: [Servidor](http://www.plantuml.com/plantuml), el cual permite trabajar con  el diagrama de manera interactiva.
-
-# Flujo de trabajo general
-
-1. Crear un sistema de archivos apropiado para almacenar las definiciones de los diagramas y los diagramas en si mismos.
-
+### Auto  diagramas
+```{r}
+umlFile = plant$makeUml(plant)
+plant$plot(umlFile)
 ```
-    RProject
-    |- .RProject.Rproj
-    |- doc1.Rmd
-    |- doc2.Rmd
-    |- ....
-    |- images
-    |  |- img1.png
-    |  +
-    |- diagrams
-    |  |- uml
-    |  |   |- diagram1.uml
-    |  |   |- diagram2.uml
-    |  |- images
-    |  |   |- diagram1.png
-    |  |   |- diagram2.png
-    ...
-    
-```
-
-2. Obtener un diagrama aproximado al objetivo en los ejemplos de PlantUML. El proyecto ofrece en su pagina web una amplia gama de ejemplos operativos que pueden ser modificados en el servidor, cada uno de ellos mostrando el uso de cada una de las caracteristicas de los diferentes diagramas posibles.
-
-3. Comprobar la correcta generación del diagrama anterior en el sistema local. Está comprobado que diagramas que se ejecutan correctamente en la plataforma On Line fallan en el entorno local (usando plantuml.jar)
-
-4. Determinar el tipo de diagrama a realizar
-
-
-## Tipos de diagramas
-
-Distinguimos los tipos de diagramas a generar en función de sus características y contenidos:
-
-- Estáticos:  No dependen del código o la documentación
-- Dinámicos:  Dependen del código ejecutado
-- Plantillas: Utilizan una representación común pero difieren en los nombres y etiquetas 
-
-### Diagramas estaticos
-
-Crear el documento de definición de diagrama y almacenar el diagrama en un archivo
 
 ### Diagramas dinámicos
 
-Aquellos en los que una parte del diagrama o todo él depende del código que se ejecute. Por ejemplo, queremos mostrar de una forma gráfica un árbol de decisión generado a partir de un cierto conjunto de datos
-
-
+Aquellos en los que una parte del diagrama depende del código; por ejemplo, determinadas etiquetas/nombres, lineas de relacion, ...
 
 En estos casos es recomendable crear una plantilla de la definición y modificarla en el propio documento.
 Por ejemplo, supongamos que 
@@ -141,9 +96,9 @@ plant$plot(umlFile)
 ```
 
 
-Añadimos las relaciones
+Añadimos las relaciones de la forma: "origen --> destino : texto"
 
-```{r, echo=FALSE, fig.cap = "Diagrama UML completo"}
+```{r}
 relaciones = function(data) {
   # Quitamos filas y columnas que son todo NA
   rr = data[!(apply(data, 1, function(x) all(is.na(x)))),]
@@ -164,4 +119,9 @@ umlData = c(umlData, relaciones(dft), relaciones(dfc))
 umlFile = plant$asS3PlantUML(umlData)
 plant$plot(umlFile)
 ```
+
+
+Y ahora vemos el link
+
+`r plant$link(umlData, "prueba de caption")`
 

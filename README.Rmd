@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 ```
 
 
-# plantumlr
+
 
 <!-- badges: start -->
 #### [![Build Status](https://travis-ci.org/Grandez/plantumlr.svg?branch=master)](https://travis-ci.org/Grandez/plantumlr)
@@ -23,7 +23,12 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/grandez/plantumlr/branch/master/graph/badge.svg)](https://codecov.io/gh/grandez/plantumlr?branch=master)
 <!-- badges: end -->
 
-The goal of plantumlr is to ...
+# umlr
+
+A package to:
+
+* Integrate UML diagrams into RMarkdown documents
+* Generate UML diagrams from R code
 
 ## Installation
 

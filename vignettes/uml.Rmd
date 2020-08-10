@@ -1,0 +1,93 @@
+---
+title: "Documenting R Classes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Documenting R Classes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE}
+# library(plantumlr)
+ source("../R/R6PlantUML.R")
+ plant = PLANTUML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+```
+
+Podemos documentar clases R6
+No se inicializa la clase base si no se invoca
+
+```{r}
+CLASS0 = R6::R6Class("R6CLASS0",
+   public = list(
+       initialize         = function( ...) {
+           browser()
+           if (length(grep("super$initialize", sys.call(), fixed=T)) == 0) error("Clase base")
+           print("Entra en class0\n")
+           private$variable = 33
+           # Hace cosas para inicializar
+       }
+       ,metodo0 = function() {
+           cat("metodo0 de clase base: ", private$variable, "\n")
+       }
+   )
+   ,private = list (
+        variable = NA
+       ,metodoPrivado1 = function(dato) {
+           # cosas del metodo privado
+       }
+
+   )
+)
+CLASS1 = R6::R6Class("R6CLASS1", inherit=CLASS0,
+   public = list(
+        attr1 = NULL
+       ,attr2 = NULL
+       ,initialize         = function( ...) {
+           print("Entra en class1\n")
+           super$initialize()
+           # Hace cosas para inicializar
+        }
+        ,finalize = function() {
+            # Hace cosas al finalizar
+        }
+       ,metodo1 = function() {
+           # Cosas del metodo 1
+       }
+   )
+   ,private = list(
+        private1 = 1
+       ,private2 = 2
+       ,c0 = CLASS0$new()
+       ,l0 = list("pepe", "juan")
+       ,metodoPrivado1 = function(dato) {
+           # cosas del metodo privado
+       }
+       ,metodoPrivado2 = function(dato) {
+           # cosas del metodo privado
+       }
+       
+   )
+)
+```
+
+Por defecto no se mostraran la parte privada
+
+```{r}
+  c1 = CLASS1$new()
+  knitr::include_graphics(c(plant$plotClass(c1, deep=FALSE),plant$plotClass(c1, deep=TRUE)))
+```
+
+Por defecto no se mostraran la parte privada
+
+```{r}
+  c1 = CLASS1$new()
+  plant$umlClass(c1, full = TRUE)
+```
+
