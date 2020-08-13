@@ -2,17 +2,21 @@
 #' @title R6PlantUML
 #' @docType class
 #' @description  La descripcion.
-#' @import R6
-#' @export
-# #' @import magick
 #'
-library(R6)
+
+# 1.- Recibe los datos
+# 2.1.- Si es un fichero
+#       2.1.1 chequea en inputDir y outputDir
+#       2.1.2 Si generar
+#             Copiar al temporal
+#             Ejecutar
+#             Copiar al destino
+#             borrar
+# 2.2 - Si es inline
+#       2.2.1 - Tiene nombre? Puede repetirse
+#               2.2.1.1 Verificar el md5 en temp
 PLANTUML = R6::R6Class("R6PLANTUML",
    public = list(
-       #' @field force Flag para forzar la recreación de diagramas
-       force = FALSE
-
-       #####
        #' @description Crea una instancia de la clase PLANTUML
        #' @param ...  named values para definir la configuración
        #' @return La instancia del objeto
@@ -21,69 +25,17 @@ PLANTUML = R6::R6Class("R6PLANTUML",
        #' plant = PLANTUML$new()
        #' plant = PLANTUML$new(jvm='java')
        #' plant = PLANTUML$new(c(jvm='java', plantuml='plantuml.jar'))
-      ,initialize         = function( ...) {
+       initialize         = function( ...) {
+          if (substr(as.character(sys.call(-1))[1], 1, 6) == "PLANTUML") private$plantErr("E900")
           parms = unlist(list(...))
           if (sum(names(parms) == "") > 0) private$plantErr("R103")
           self$setConfig(parms)
       }
       ,finalize = function() {
-          message("Cleaning up ")
-      }
-      #' @description Genera un diagrama a partir de la definición pasada
-      #' @param data  Definición del diagrama o fichero con la misma
-      #' @details
-      #'     - Si no se especifica type se asume el tipo de imagen definido en la instancia
-      #'     - El fichero con la imagen no se almacena en el sistema de archivos
-      ,plot               = function(data=NULL) {
-          imgFile = private$makeImage(data, self$getType())
-          knitr::include_graphics(imgFile)
-      }
-      #' @description Genera un link al fichero de imagen con el diagrama
-      #' @seealso [plot()] para generacion en linea
-      #' @param data  Definicion del diagrama o fichero con la misma
-      #' @param caption Titulo de la imagen
-      #' @return la cadena del link
-      ,link              = function(data = NULL, caption = NULL) {
-        imgFile = private$makeImage(data, type)
-        target  = file.path(self$getOutputDir(), basename(imgFile))
-        paste0('[![', caption, "](", target, " \'", caption, "\')](https://127.0.0.1)")
-      }
-      #' @description Almacena el fichero de la imagen en el sistema de archivos
-      #' @seealso [plot()] para generacion en linea
-      #' @param data  Definicion del diagrama o fichero con la misma
-      #' @param caption Titulo de la imagen
-      #' @param force   Fuerza a regenerar el fichero
-      #' @return la cadena del link
-      ,file               = function(data=NULL, caption=NULL, force=NULL) {
-        private$makeImage(data, self$getType())
-      }
-      #' @description Carga un fichero de definicion de diagrama como clase S3PlantUML
-      #' @family generics
-      #' @param fileName  Path al fichero con la definicion
-      #' @return una clase S3PlantUML
-      ,load             = function(fileName=NULL) {
-          if (is.nul(fileName))        private$plantErr("E101", fileName)
-          if (!file.exists(fileName))  private$plantErr("E101", fileName)
-          tryCatch({
-              data = readLines(fileName)
-              structure(data, class = "S3PlantUML")
-            },error = function (e) {
-                 private$plantErr("E102", fileName)
-            }
-          )
-          names(data) = strsplit(fileName, ".", fixed = TRUE)[[1]]
-          private$removeUmlTags(data)
-      }
-
-      #' @description Devuelve un vector con el código de definición del diagrama
-      #' @param data  Definición del diagrama o fichero con la misma
-      #' @return el codigo de definición del diagrama
-      ,getDefinition = function(data=NULL) {
-          if (private$dataInline(data)) {
-              def = private$prepareData(data)
-              return (private$removeUmlTags(data))
-          }
-          self$load(data)
+          message("Cleaning up clase base")
+          files = gsub("\\..+$", "\\.\\*", private$files)
+          lista = list.files(tempdir(), files, full.names=TRUE)
+          file.remove(lista)
       }
       #' @description Si es posible, convierte los datos pasados en una clase PLANTUML
       #'              Usado desde la funcion generica as.plantuml. **No invocar directamente**
@@ -103,16 +55,6 @@ PLANTUML = R6::R6Class("R6PLANTUML",
           if (!is.null(name))             names(txt) = name
           structure(txt, class="S3PlantUML")
       }
-      #' @description Genera el diagrama de la clase pasada
-      ,plotClass             = function (object, full=FALSE, deep = FALSE) {
-          self$plot(self$umlClass(object,full, deep))
-      }
-      ,umlClass             = function (object, full=FALSE, deep = FALSE) {
-          if (isS4(object))            return (private$parseS4(object, full, deep))
-          if ("R6" %in% class(object)) return (private$parseR6(object, full, deep))
-          warning("'object' is not an instance of S4 or R6 Classes"))
-      }
-
       #' @description
       #'     Verifica la corrección de los datos de configuración de la clase.
       #'     Se recomienda su uso en desarrollo para verificar que los valores son correctos
@@ -244,8 +186,10 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       # Getters and setters
       #####################################################
 
+      #' @description si activo no hace cache
+      #' @return El estado del flag
+      ,getForce      = function() private$force
       #' @description Devuelve el nombre de la maquina virtual java
-      #' @family setters y getters
       #' @return El nombre del ejecutable de la maquina virtual java
       ,getJVM       = function() private$cfg[["jvm"]]
       #' @description Devuelve la ubicacion del archivo jar plantuml.jar
@@ -253,11 +197,16 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       #' @return La ubicacion del archivo jar plantuml.jar
       ,getPlantUML  = function() private$cfg[["plantuml"]]
       #' @description Devuelve la ubicacion del directorio por defecto de las definiciones de diagramas
-      #' @family setters y getters
       #' @return La ubicacion del directorio por defecto de las definiciones de diagramas
-      ,getUmlDir  = function(real = FALSE) {
-          if (!is.null(private$cfg[["umlDir"]]) || !real) return (private$cfg[["umlDir"]])
-          tempdir()
+      ,getInputDir  = function(real = FALSE) {
+           if (is.null(private$cfg[["inputDir"]]) && real) return(tempdir)
+           private$cfg[["umlDir"]]
+      }
+      #' @description Devuelve la ubicacion del directorio por defecto de las imagenes de diagramas
+      #' @return La ubicacion del directorio por defecto de las imagenes de diagramas
+      ,getOutputDir  = function(real = FALSE) {
+          if (is.null(private$cfg[["outputDir"]]) && real) return(tempdir)
+          private$cfg[["outputDir"]]
       }
       #' @description Devuelve la extensión por defecto para almacenar los ficheros de diagramas
       #' @family setters y getters
@@ -271,6 +220,10 @@ PLANTUML = R6::R6Class("R6PLANTUML",
       #' @family setters y getters
       #' @return El juego de caracteres por defecto
       ,getCharset   = function() private$cfg[["charset"]]
+      ,setForce     = function(value) {
+          private$force = as.logical(value)
+          invisible(self)
+      }
       #' @description Establece la maquina virtual Java a utilizar
       #' @param value nombre de la maquina virtual
       ,setJVM       = function(value) { private$cfg["jvm"]      = private$checkString(value); invisible(self) }
@@ -293,21 +246,33 @@ PLANTUML = R6::R6Class("R6PLANTUML",
         private$cfg["type"] = value
         invisible(self)
       }
-      #' @description Establece directorio por defecto donde buscar los ficheros de diagramas
+      #' @description Establece directorio por defecto donde buscar las definiciones de diagramas
       #'              Puede ser relativo o absoluto
-      #' @param value El directorio por defecto donde buscar los ficheros de diagramas
-      ,setUmlDir  = function(value=NULL) {
-          private$cfg["umlDir"] = ifelse(is.null(value), NULL, private$checkString(value))
+      #' @param value El directorio por defecto donde buscar los ficheros de definiciones
+      ,setInputDir  = function(value=NULL) {
+          private$cfg["inputDir"] = ifelse(is.null(value), NULL, private$checkString(value))
           invisible(self)
-       }
+      }
+      #' @description Establece directorio donde guardar los diagramas
+      #'              Puede ser relativo o absoluto
+      #' @param value El directorio donde guardar los ficheros de definiciones
+      ,setOutputDir  = function(value=NULL) {
+        private$cfg["outputDir"] = ifelse(is.null(value), NULL, private$checkString(value))
+        invisible(self)
+      }
    )
    ,private = list(
-       cfg=list( jvm       = "java"
-                 ,plantuml = "plantuml.jar"
-                 ,ext      = "uml"
-                 ,type     = "png"
-                 ,charset  = "utf-8"
-                 ,umldir   = NULL
+       inline = FALSE        # Mark data as inline
+      ,files  = NULL         # Files generated
+      ,res    = NULL         # Messages from plantuml
+      ,force  = FALSE        # Recreate diagrams
+      ,cfg=list( jvm        = "java"
+                 ,plantuml  = "plantuml.jar"
+                 ,ext       = "uml"
+                 ,type      = "png"
+                 ,charset   = "utf-8"
+                 ,inputDir  = NULL
+                 ,outputDir = NULL
       )
       ,types  = c("png", "jpg", "svg")
       ,msgErr = c(
@@ -348,160 +313,16 @@ PLANTUML = R6::R6Class("R6PLANTUML",
         ,E001="Error generating diagram"
         ,E101="Invalid file name: %s"
         ,E102="Reading file name: %s"
+        ,E900="This class is abstract"
       )
       ,testData="@startuml
                     [*]-->STATE1
                  @enduml"
-      ,plantErr         = function(code, ..., newCode=0) {
-          if (newCode != 0) {
-              text = sprintf("PUMLE%03d - %s", newCode, private$msgErr[code])
-          }
-          else {
-              msg = sprintf(private$msgErr[code], ...)
-              text = sprintf("PUML%s - %s", code, msg)
-          }
-          c <- errorCondition(text, class=c("plantUMLErr", "error"))
-          stop(c)
-      }
-      ,makeImage        = function(data,type) {
-          umlFile = private$mountInputFile(data)
-          imgFile = gsub("\\..+$", paste0(".", type), umlFile)
-          private$callPlantUML(umlFile, type)
-          imgFile
-      }
-      ,callPlantUML     = function(umlFile, type) {
-          # Si la llamada es correcta no informa status
-          res = suppressWarnings( system2( self$getJVM()
-                        ,c("-jar", self$getPlantUML()
-                        ,paste0("-t", type)
-                        # ,"-o", normalizePath(outDir)
-                        ,umlFile), stdout=TRUE, stderr=TRUE)
-                )
-          rc = ifelse(is.null(attr(res, "status")), 0, attr(res, "status"))
-          if (rc != 0) {
-              private$plantErr("E001", newCode=rc)
-          }
-      }
-      ,mountInputFile   = function(data) {
-          inDir = self$getUmlDir(TRUE)
-
-          if (is.null(data)) private$plantErr("R201")
-          if (private$dataInline(data)) {
-              if (!is.null(names(data))) inFile = names(data)
-              if ( is.null(names(data))) inFile = basename(tempfile("pumld"))
-              inFile = file.path(inDir, inFile)
-              return (private$prepareFile(data, paste0(inFile, ".", self$getExt())))
-          }
-
-          inFile = data
-          # Check for absolute path in nix and windows
-          if (substring(inFile, 1,1) == "/") return(data)
-          if (nchar(inFile) > 1 && substring(inFile, 2,2) == ":") return(data)
-
-          if (length(strsplit(inFile, ".",fixed=TRUE)[[1]]) == 1 ) {
-              inFile = paste(inFile, self$getExt(), sep=".")
-          }
-
-          inFile = file.path(inDir, inFile)
-          if (!file.exists(inFile)) private$plantErr("R205")
-          inFile
-      }
-      # ,mountOutputFile  = function(umlFile, ext) {
-      #     ff = strsplit(basename(umlFile), ".", fixed=TRUE)[[1]][1]
-      #     file.path(self$getOutputDir(TRUE), paste0(ff,".",ext))
-      # }
-      ,dataInline       = function(data) {
-         if (is.list(data))    return (TRUE)
-         if (length(data) > 1) return (TRUE)
-         words = strsplit(data, " ")
-         if (length(words[[1]]) > 1) return (TRUE)
-         words = strsplit(data, "\n")
-         if (length(words[[1]]) > 1) return (TRUE)
-         FALSE
-      }
-      ,prepareFile      = function(data, fileName) {
-          txt = data
-          if(is.list(data)) txt = unlist(data)
-          if (length(txt) > 1) txt = paste(txt, collapse="\n")
-          if (length(grep("@startuml", txt, fixed = TRUE)) == 0) {
-              txt = paste("@startuml \n", txt, "\n@enduml \n")
-          }
-          writeLines(txt, fileName)
-          fileName
-      }
-      ,fileChanged      = function(umlFile, imgFile) {
-          if (!file.exists(imgFile)) return (TRUE)
-          file.info(umlFile)$mtime > file.info(imgFile)$mtime
-      }
-      ,checkJVM         = function() {
-        rc = suppressWarnings(system2( self$getJVM()
-                                       ,"-version"
-                                       ,stdout=FALSE
-                                       ,stderr=FALSE))
-        ifelse(rc == 0, TRUE, FALSE)
-      }
-      ,checkDOT         = function() {
-          ifelse (.Platform$OS.type == "windows"
-                  ,private$checkDOTWin()
-                  ,private$checkDOTUnix())
-      }
-      ,checkDOTWin      = function() {
-          # Hay que procesar ProgramFiles y x86por separado,
-          # por que los directorios pueden tener los mismos nombres
-
-          if (private$checkDOTWinPF("ProgramFiles"))     return (TRUE)
-          if (private$checkDOTWinPF("ProgramFiles(x86")) return (TRUE)
-          file.exists(Sys.getenv("GRAPHVIZ_DOT"))
-      }
-      ,checkDOTWinPF    = function(programfiles) {
-          pf = Sys.getenv(programfiles)
-          dirs = list.files(pf)
-          dirs = dirs[grepl("Graphviz.*", dirs, ignore.case = TRUE)]
-          if (length(dirs) > 0) {
-              dirs = paste(pf, dirs, "bin\\dot.exe", sep="\\")
-              files = sapply(dirs, file.exists)
-              if (sum(files) > 0) return (TRUE)
-          }
-          FALSE
-      }
-      ,checkDOTUnix     = function() {
-          if (file.exists("/usr/local/bin/dot")) return (TRUE)
-          if (file.exists("/usr/bin/dot"))       return (TRUE)
-          file.exists(Sys.getenv("GRAPHVIZ_DOT"))
-      }
-      ,checkExecution   = function() {
-          res = system2( self$getJVM()
-                        ,c("-jar", self$getPlantUML(), "-testdot")
-                        ,stdout=TRUE)
-          if (length(res) != 2) return(FALSE)
-          grepl("seems OK", res[2])
-      }
-      ,checkEnvironment = function() {
-          file = basename(tempfile())
-          link=NULL
-          tryCatch ({
-             link = self$image(private$testData)
-             file.remove(strsplit(link, "[()]")[[1]][2])
-           }
-          ,error = function(e) return (FALSE)
-          )
-          TRUE
-      }
       ,restoreForce     = function() {
          # if (!is.null(private$oldForce)) {
          #     self$force = private$oldForce
          #     private$oldForce = NULL
          # }
-      }
-      ,checkString      = function(value) {
-          if (missing(value) || is.null(value))
-              private$plantErr("R006")
-          if (!is.character(value) || length(value) != 1)
-              private$plantErr("R006")
-          trimmed = gsub("[[:space:]]", "", value)
-          if (nchar(trimmed) == 0)
-              private$plantErr("R006")
-          trimmed
       }
       ,checkType        = function (type) {
         if (!(type %in% private$types)) private$plantErr("R107")
@@ -608,13 +429,187 @@ PLANTUML = R6::R6Class("R6PLANTUML",
           names(classes) = vars
 
       }
-      ,removeUmlTags   = function (data) {
-         # Es mas rapido obtener el indice que hacer una sustitucion
-         pos = grep("@startuml", data)
-         if (pos > 0) data[pos] = ""
-         pos = grep("@enduml", data)
-         if (pos > 0) data[pos] = ""
-         data
+      ##############################################################################
+      ##### CHECKED
+      ##############################################################################
+      ,plantErr         = function(code, ..., newCode=0) {
+        if (newCode != 0) {
+          text = sprintf("PUMLE%03d - %s", newCode, private$msgErr[code])
+        }
+        else {
+          msg = sprintf(private$msgErr[code], ...)
+          text = sprintf("PUML%s - %s", code, msg)
+        }
+        c <- errorCondition(text, class=c("plantUMLErr", "error"))
+        stop(c)
       }
+      ,makeImage        = function(data, force=FALSE) {
+        private$dataInline(data)
+        umlFile = private$mountInputFile(data)
+        imgFile = gsub("\\..+$", paste0(".png"), umlFile)
+
+        # Verificar que el fichero o los datos no han cambiado
+        if (!force) {
+          if (!private$inline) {
+            if (!private$fileChanged(umlFile, imgFile)) return (imgFile)
+          }
+          else {
+            # Buscar el MD5
+          }
+          # Como verificar los temporales
+          #JGG else {
+          #JGG   if (!private$fileTempChanged(data)) return (private$mountOutputFile(data))
+          #JGG }
+        }
+
+        private$callPlantUML(umlFile)
+        imgFile
+      }
+      ,callPlantUML     = function(umlFile) {
+          f = umlFile
+          if (!private$inline) {
+              f = file.path(tempdir(), basename(umlFile))
+              file.copy(umlFile, f)
+          }
+          private$files = c(private$files, basename(f))
+          # Si la llamada es correcta no informa status
+          private$res = suppressWarnings( system2( self$getJVM()
+                                          ,c("-jar", self$getPlantUML()
+                                          ,"-tpng"
+                                          ,"-verbose"
+                                          ,f), stdout=TRUE, stderr=TRUE)
+          )
+          rc = ifelse(is.null(attr(private$res, "status")), 0, attr(private$res, "status"))
+          if (rc != 0) private$plantErr("E001", newCode=rc)
+      }
+      ,dataInline       = function(data) {
+          private$inline = FALSE
+          if (is.list(data) || length(data) > 1)  {
+              private$inline = TRUE
+          }
+          else {
+              words = strsplit(data, " ")
+              if (length(words[[1]]) > 1) private$inline = TRUE
+              words = strsplit(data, "\n")
+              if (length(words[[1]]) > 1) private$inline = TRUE
+          }
+      }
+      ,mountInputFile   = function(data) {
+        if (private$inline) {
+          inFile = basename(tempfile("pumld"))
+          if (!is.null(names(data))) inFile = paste0("pumln", names(data)[1])
+          return (private$prepareFile(data, file.path(tempdir(), paste0(inFile, ".uml"))))
+        }
+
+        inFile = data
+        # Check for absolute path in nix and windows
+        if (substring(inFile, 1,1) == "/") return(data)
+        if (nchar(inFile) > 1 && substring(inFile, 2,2) == ":") return(data)
+
+        if (length(grep(".", inFile, fixed=TRUE))== 0 ) {
+          inFile = paste(inFile, self$getExt(), sep=".")
+        }
+
+        inFile = file.path(self$getInputDir(), inFile)
+        if (!file.exists(inFile)) private$plantErr("R205")
+        inFile
+      }
+      # ,mountOutputFile  = function(umlFile, ext) {
+      #     ff = strsplit(basename(umlFile), ".", fixed=TRUE)[[1]][1]
+      #     file.path(self$getOutputDir(TRUE), paste0(ff,".",ext))
+      # }
+      ,prepareFile      = function(data, fileName) {
+          txt = data
+          if (is.list(data)) txt = unlist(data)
+          if (length(txt) > 1) txt = paste(txt, collapse="\n")
+          if (length(grep("@startuml", txt, fixed = TRUE)) == 0) {
+              txt = paste("@startuml \n", txt, "\n@enduml \n")
+          }
+          writeLines(txt, fileName)
+          fileName
+      }
+
+      ,fileChanged      = function(umlFile, imgFile) {
+        if (!file.exists(imgFile)) return (TRUE)
+        file.info(umlFile)$mtime > file.info(imgFile)$mtime
+      }
+      ,removeUmlTags   = function (data) {
+          gsub("@startuml | @enduml", "", data, fixed=TRUE)
+          # browser()
+          # # Es mas rapido obtener el indice que hacer una sustitucion
+          # pos = grep("@startuml", data)
+          # if (pos > 0) data[pos] = ""
+          # pos = grep("@enduml", data)
+          # if (pos > 0) data[pos] = ""
+          # data
+      }
+      #############################################################
+      ### Checkers
+      #############################################################
+      ,checkJVM         = function() {
+        rc = suppressWarnings(system2( self$getJVM()
+                                       ,"-version"
+                                       ,stdout=FALSE
+                                       ,stderr=FALSE))
+        ifelse(rc == 0, TRUE, FALSE)
+      }
+      ,checkDOT         = function() {
+        ifelse (.Platform$OS.type == "windows"
+                ,private$checkDOTWin()
+                ,private$checkDOTUnix())
+      }
+      ,checkDOTWin      = function() {
+        # Hay que procesar ProgramFiles y x86por separado,
+        # por que los directorios pueden tener los mismos nombres
+
+        if (private$checkDOTWinPF("ProgramFiles"))     return (TRUE)
+        if (private$checkDOTWinPF("ProgramFiles(x86")) return (TRUE)
+        file.exists(Sys.getenv("GRAPHVIZ_DOT"))
+      }
+      ,checkDOTWinPF    = function(programfiles) {
+        pf = Sys.getenv(programfiles)
+        dirs = list.files(pf)
+        dirs = dirs[grepl("Graphviz.*", dirs, ignore.case = TRUE)]
+        if (length(dirs) > 0) {
+          dirs = paste(pf, dirs, "bin\\dot.exe", sep="\\")
+          files = sapply(dirs, file.exists)
+          if (sum(files) > 0) return (TRUE)
+        }
+        FALSE
+      }
+      ,checkDOTUnix     = function() {
+        if (file.exists("/usr/local/bin/dot")) return (TRUE)
+        if (file.exists("/usr/bin/dot"))       return (TRUE)
+        file.exists(Sys.getenv("GRAPHVIZ_DOT"))
+      }
+      ,checkExecution   = function() {
+        res = system2( self$getJVM()
+                       ,c("-jar", self$getPlantUML(), "-testdot")
+                       ,stdout=TRUE)
+        if (length(res) != 2) return(FALSE)
+        grepl("seems OK", res[2])
+      }
+      ,checkEnvironment = function() {
+        file = basename(tempfile())
+        link=NULL
+        tryCatch ({
+          link = self$image(private$testData)
+          file.remove(strsplit(link, "[()]")[[1]][2])
+        }
+        ,error = function(e) return (FALSE)
+        )
+        TRUE
+      }
+      ,checkString      = function(value) {
+          if (missing(value) || is.null(value))
+              private$plantErr("R006")
+          if (!is.character(value) || length(value) != 1)
+              private$plantErr("R006")
+          trimmed = gsub("[[:space:]]", "", value)
+          if (nchar(trimmed) == 0)
+              private$plantErr("R006")
+           trimmed
+      }
+
    )
 )

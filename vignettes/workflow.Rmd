@@ -18,7 +18,8 @@ knitr::opts_chunk$set(
  #JGG No usamos la linreria para poder probar en desarrollo  
  # library(plantumlr)
  source("../R/R6PlantUML.R")
- plant = PLANTUML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+ source("../R/R6UML.R")
+ plant = UML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
 ```
 
 # Introduccion

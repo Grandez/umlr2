@@ -16,33 +16,30 @@ knitr::opts_chunk$set(
 
 ```{r setup, echo=FALSE}
 # library(plantumlr)
- source("../R/R6PlantUML.R")
- plant = PLANTUML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+ file.sources = list.files("../R", pattern="*.R", full.names=T) 
+ sapply(file.sources,source,.GlobalEnv)
+ #source("../R/R6PlantUML.R")
+ #source("../R/R6CLASS.R")
+ #source("../R/R6UMLR.R")
+ plant = UMLR$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
 ```
 
 Podemos documentar clases R6
 No se inicializa la clase base si no se invoca
 
 ```{r}
+
 CLASS0 = R6::R6Class("R6CLASS0",
    public = list(
-       initialize         = function( ...) {
-           browser()
-           if (length(grep("super$initialize", sys.call(), fixed=T)) == 0) error("Clase base")
-           print("Entra en class0\n")
-           private$variable = 33
-           # Hace cosas para inicializar
-       }
-       ,metodo0 = function() {
-           cat("metodo0 de clase base: ", private$variable, "\n")
-       }
+       initialize         = function( ...) { }
+       ,method0 = function() { }
+   )
+   ,active  = list (
+       var0 = function(value) { }
    )
    ,private = list (
-        variable = NA
-       ,metodoPrivado1 = function(dato) {
-           # cosas del metodo privado
-       }
-
+        .var0 = NA
+       ,.method1 = function(dato) {}
    )
 )
 CLASS1 = R6::R6Class("R6CLASS1", inherit=CLASS0,
@@ -50,27 +47,23 @@ CLASS1 = R6::R6Class("R6CLASS1", inherit=CLASS0,
         attr1 = NULL
        ,attr2 = NULL
        ,initialize         = function( ...) {
-           print("Entra en class1\n")
-           super$initialize()
-           # Hace cosas para inicializar
         }
         ,finalize = function() {
             # Hace cosas al finalizar
         }
-       ,metodo1 = function() {
-           # Cosas del metodo 1
+       ,method1 = function() {
+           # Cosas del method 1
        }
    )
    ,private = list(
         private1 = 1
        ,private2 = 2
-       ,c0 = CLASS0$new()
        ,l0 = list("pepe", "juan")
-       ,metodoPrivado1 = function(dato) {
-           # cosas del metodo privado
+       ,privMethod1 = function(dato) {
+           # cosas del method privado
        }
-       ,metodoPrivado2 = function(dato) {
-           # cosas del metodo privado
+       ,privMethod2 = function(dato) {
+           # cosas del method privado
        }
        
    )
@@ -79,9 +72,11 @@ CLASS1 = R6::R6Class("R6CLASS1", inherit=CLASS0,
 
 Por defecto no se mostraran la parte privada
 
-```{r}
+```{r, fig.cap=c('deep=FALSE','deep=TRUE'), fig.show='hold',fig.align='top' }
   c1 = CLASS1$new()
-  knitr::include_graphics(c(plant$plotClass(c1, deep=FALSE),plant$plotClass(c1, deep=TRUE)))
+  #knitr::include_graphics(c(plant$plotClass(c1, deep=FALSE),plant$plotClass(c1, deep=TRUE)))
+  plant$plotClass(c1)
+  #plant$plotClass(c1)
 ```
 
 Por defecto no se mostraran la parte privada
@@ -91,3 +86,165 @@ Por defecto no se mostraran la parte privada
   plant$umlClass(c1, full = TRUE)
 ```
 
+
+
+La composicion se detecta en tiempo de inicializacion
+
+```{r}
+CLASS10 = R6::R6Class("R6CLASS10",
+   public = list(
+       initialize         = function( ...) {
+           # Hace cosas para inicializar
+       }
+       ,method0 = function() {
+           cat("method0 de clase base: ", private$variable, "\n")
+       }
+   )
+   ,private = list (
+        variable = NA
+       ,privMethod1 = function(dato) {
+           # cosas del method privado
+       }
+
+   )
+)
+
+CLASS110 = R6::R6Class("R6CLASS110", inherit=CLASS10,
+   public = list(
+        attr1 = NULL
+       ,attr2 = NULL
+       ,initialize         = function( ...) {
+           # Hace cosas para inicializar
+        }
+        ,finalize = function() {
+            # Hace cosas al finalizar
+        }
+       ,method1 = function() {
+           # Cosas del method 1
+       }
+   )
+   ,private = list(
+        private1 = 1
+       ,private2 = 2
+       ,l0 = list("pepe", "juan")
+       ,privMethod1 = function(dato) {
+           # cosas del method privado
+       }
+       ,privMethod2 = function(dato) {
+           # cosas del method privado
+       }
+       
+   )
+)
+
+CLASS111 = R6::R6Class("R6CLASS111", 
+   public = list(
+        attr1 = NULL
+       ,attr2 = NULL
+       ,initialize         = function( ...) {
+           # Hace cosas para inicializar
+        }
+        ,finalize = function() {
+            # Hace cosas al finalizar
+        }
+       ,method1 = function() {
+           # Cosas del method 1
+       }
+   )
+   ,private = list(
+        private1 = 1
+       ,private2 = 2
+       ,c0 = CLASS0$new()
+       ,l0 = list("pepe", "juan")
+       ,privMethod1 = function(dato) {
+           # cosas del method privado
+       }
+       ,privMethod2 = function(dato) {
+           # cosas del method privado
+       }
+       
+   )
+)
+
+CLASS112 = R6::R6Class("R6CLASS112", 
+   public = list(
+        attr1 = NULL
+       ,attr2 = NULL
+       ,initialize         = function( ...) {
+           # Hace cosas para inicializar
+        }
+        ,finalize = function() {
+            # Hace cosas al finalizar
+        }
+       ,method1 = function() {
+           # Cosas del method 1
+       }
+   )
+   ,private = list(
+        private1 = 1
+       ,private2 = 2
+       ,c0 = CLASS0$new()
+       ,l0 = list("pepe", "juan")
+       ,privMethod1 = function(dato) {
+           # cosas del method privado
+       }
+       ,privMethod2 = function(dato) {
+           # cosas del method privado
+       }
+       
+   )
+)
+
+CLASS113 = R6::R6Class("R6CLASS113", 
+   public = list(
+        initialize         = function( ...) {
+           # Hace cosas para inicializar
+        }
+        ,finalize = function() {
+            # Hace cosas al finalizar
+        }
+       ,method1 = function() {
+           # Cosas del method 1
+       }
+   )
+   ,private = list(
+   )
+)
+
+CLASS11 = R6::R6Class("R6CLASS11", inherit=CLASS10,
+   public = list(
+        attr1 = NULL
+       ,attr2 = NULL
+       ,class110 = CLASS110$new()       
+       ,initialize         = function( ...) {
+           # Hace cosas para inicializar
+        }
+        ,finalize = function() {
+            # Hace cosas al finalizar
+        }
+       ,method1 = function() {
+           c113 = CLASS113$new()
+       }
+   )
+   ,private = list(
+        private1 = 1
+       ,private2 = 2
+       ,class111 = CLASS111$new()
+       ,c0 = CLASS0$new()
+       ,l0 = list("pepe", "juan")
+       ,privMethod1 = function(dato) {
+           # cosas del method privado
+       }
+       ,privMethod2 = function(dato) {
+           # cosas del method privado
+       }
+       
+   )
+)
+
+```
+
+```{r}
+  c11 = CLASS11$new()
+  plant$plotClass(c11, deep=TRUE)
+```  

@@ -1,4 +1,4 @@
-Package: plantumlr
+Package: umlr2
 Title: A class to integrate PlantUML diagrams into RMarkdown documents
 Version: 0.0.0.9004
 Authors@R: 
