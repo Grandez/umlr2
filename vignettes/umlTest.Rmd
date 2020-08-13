@@ -16,13 +16,10 @@ knitr::opts_chunk$set(
 
 ```{r setup, echo=FALSE}
  #library(umlr2)
- source("../R/R6UMLRCtes.R")
- source("../R/R6CLASS.R")
- source("../R/R6PlantUML.R")
- source("../R/R6UMLR.R")
- # file.sources = list.files("../R", pattern="*.R", full.names=T) 
- # sapply(file.sources, source, .GlobalEnv)
- plant = UMLR$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+files.r = list.files("../R", pattern="*\\.R$", full.names=TRUE, ignore.case=F)
+sapply(files.r, source)
+
+plant = UMLR$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
 ```
 
 # Intro
