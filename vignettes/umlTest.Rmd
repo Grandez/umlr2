@@ -8,13 +8,16 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+LOCAL <- identical(Sys.getenv("R_LOCAL"), "TRUE")
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  purl = LOCAL
 )
 ```
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE}
+
  #library(umlr2)
 files.r = list.files("../R", pattern="*\\.R$", full.names=TRUE, ignore.case=F)
 xx = sapply(files.r, source)
