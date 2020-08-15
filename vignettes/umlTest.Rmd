@@ -36,9 +36,9 @@ Actualmente es posible procesar:
 El proceso general consiste en crear un objeto **UMLR** y ejecutar el metodo `plotClass`:
 
 ```{r, eval=FALSE, echo=TRUE}
-# obj = Objeto$new()  # Object to plot
-# uml =  UMLR$new()   # Get an instance of UMLR
-# uml$plotClass(obj, detail=level_of_detail, deep=deep_level)
+ obj = Objeto$new()  # Object to plot
+ uml =  UMLR$new()   # Get an instance of UMLR
+ uml$plotClass(obj, detail=level_of_detail, deep=deep_level)
 ```
 
 # Detail
@@ -50,7 +50,7 @@ Este parametro define el detalle que se quiere generar de la clase.
 
 Supongamos la siguiente clase sencilla
 
-```{r, eval=TRUE}
+```{r}
 CLASS0 = R6::R6Class("R6CLASS0",
  public = list(
      initialize = function(...) { }
@@ -73,7 +73,7 @@ Nota que dado que no tiene herencia `basic` y `simple` son equivalentes
 
 | basic  | simple | complete |
 |:-:|:-:|:-:|
-| `r plant$plotClass(c0, UMLShow$basic)`|`r plant$plotClass(c0, UMLShow$simple)`|`r plant$plotClass(c0, UMLShow$complete)`|
+| `r eval = LOCAL, plant$plotClass(c0, UMLShow$basic)`|`r eval = LOCAL, plant$plotClass(c0, UMLShow$simple)`|`r eval = LOCAL, plant$plotClass(c0, UMLShow$complete)`|
 
 Creemos otra clase:
 
@@ -97,7 +97,7 @@ Creemos otra clase:
 
 | basic  | simple | complete |
 |:-:|:-:|:-:|
-|`r plant$plotClass(c01, UMLShow$basic)`|`r plant$plotClass(c01, UMLShow$simple)`|`r plant$plotClass(c01, UMLShow$complete)`|
+|`r eval = LOCAL, plant$plotClass(c01, UMLShow$basic)`|`r eval = LOCAL, plant$plotClass(c01, UMLShow$simple)`|`r eval = LOCAL, plant$plotClass(c01, UMLShow$complete)`|
 
 Incluimos las superclasses en el diagrama. 
 Para esto es necesario contemplar:
@@ -113,7 +113,7 @@ Ejemplo: `plant$plotClass(clase, c(UMLShow$complete,UMLShow$parents,UMLShow$simp
 ```
 | classBasic  | classSimple | classComplete |
 |:-:|:-:|:-:|
-|`r plant$plotClass(c01, base)`|`r plant$plotClass(c01, c(base,UMLShow$classSimple))`|`r plant$plotClass(c01,c(base,UMLShow$classComplete))`|
+|`r eval = LOCAL, plant$plotClass(c01, base)`|`r eval = LOCAL, plant$plotClass(c01, c(base,UMLShow$classSimple))`|`r eval = LOCAL, plant$plotClass(c01,c(base,UMLShow$classComplete))`|
 
 Ahora creamos una clase con composicion y agregacion.
 La composicion se interpreta como las clases que se instancian junto con la propia clase
@@ -177,16 +177,16 @@ CLASS1 = R6::R6Class("R6CLASS1",
 c1 = CLASS1$new()
 ```
 
-```{r, echo=FALSE}
+```{r, eval = LOCAL, echo=FALSE}
   base = UMLShow$complete + UMLShow$subclasses
 ```
-```{r echo=FALSE, fig.cap = "classBasic" }
+```{r eval = LOCAL, echo=FALSE, fig.cap = "classBasic" }
  plant$plotClass(c1, base)
 ``` 
-```{r echo=FALSE, fig.cap="classSimple" }
+```{r eval = LOCAL, echo=FALSE, fig.cap="classSimple" }
  plant$plotClass(c1, c(base,UMLShow$classSimple))
 ```
-```{r echo=FALSE, fig.cap="classComplete" }
+```{r eval = LOCAL, echo=FALSE, fig.cap="classComplete" }
  plant$plotClass(c1,c(base,UMLShow$classComplete))
 ``` 
 
@@ -251,11 +251,11 @@ c1 = CLASS1$new()
 ```
 
 
-```{r, echo=FALSE}
+```{r eval = LOCAL, echo=FALSE}
  base = UMLShow$complete + UMLShow$subclasses + UMLShow$parents
 ```
 
-```{r echo=FALSE, fig.cap="classSimple" }
+```{r eval = LOCAL, echo=FALSE, fig.cap="classSimple" }
  plant$plotClass(c1, c(base,UMLShow$classSimple), deep=5)
 ```
 
