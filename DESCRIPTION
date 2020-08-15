@@ -1,20 +1,26 @@
-Package: umlr2
-Title: A class to integrate PlantUML diagrams into RMarkdown documents
-Version: 0.0.0.9014
+Package: UMLR2
+Title: Create UML diagramas into RMarkdown documents
+Version: 0.0.14.202008
 Authors@R: 
     person(given = "Javier",
            family = "Gonzalez",
            role = c("aut", "cre"),
            email = "javier.gonzalez@outlook.es",
            comment = c(ORCID = "0000-0003-2477-3203"))
-Description: Class to mange UML diagrams generated using PlantUML project.
+Description: 
+    This package allows create and use UML diagrams directly in a RMarkdown document.
+    Also it is able to generate UML diagrams directly from R Classes.
 Depends: 
-   R (>= 4.0.0),
+   R (>= 4.0.0)
+Imports: 
    R6
 Suggests: 
     knitr,
     rmarkdown,
     covr
+SystemRequirements:
+    PlantUML,
+    Graphviz
 VignetteBuilder: knitr
 License: GPL-3
 Encoding: UTF-8

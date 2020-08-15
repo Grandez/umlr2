@@ -13,9 +13,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-
-
-
 <!-- badges: start -->
 #### [![Build Status](https://travis-ci.org/Grandez/plantumlr.svg?branch=master)](https://travis-ci.org/Grandez/plantumlr)
 
@@ -23,26 +20,28 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/grandez/plantumlr/branch/master/graph/badge.svg)](https://codecov.io/gh/grandez/plantumlr?branch=master)
 <!-- badges: end -->
 
-# umlr
+# UMLR2
 
 A package to:
 
 * Integrate UML diagrams into RMarkdown documents
-* Generate UML diagrams from R code
+* Generate UML diagrams from R classes and code
+
+## Motivation
 
 ## Installation
 
 You can install the released version of plantumlr from [CRAN](https://CRAN.R-project.org) with:
 
 ``` {r, eval=FALSE}
-install.packages("plantumlr")
+install.packages("UMLR2")
 ```
 
 And the development version from [GitHub](https://github.com/) with:
 
 ```{r, eval=FALSE}
 # install.packages("devtools")
-devtools::install_github("grandez/plantumlr")
+devtools::install_github("grandez/umlr2")
 ```
 ## Example
 

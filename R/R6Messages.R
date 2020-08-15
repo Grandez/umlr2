@@ -28,7 +28,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param ... Informacion necesaria para el mensaje concreto
        #' @return El mensaje
        ,msg = function(code, ..., newCode=0) {
-            mountMessage(code, ..., newCode)
+            private$mountMessage(code, ..., newCode)
        }
        #' @description Genera un aviso
        #' @param code Codigo de aviso
@@ -36,7 +36,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param ... Informacion necesaria para el mensaje concreto
        #' @return El aviso
        ,warning = function(code, ..., newCode=0) {
-          warning(mountMessage(code, ..., newCode))
+          warning(private$mountMessage(code, ..., newCode))
        }
        #' @description Genera un mensaje de error y lanza la excepcion
        #' @param code Codigo de error
@@ -44,7 +44,8 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param ... Informacion necesaria para el mensaje concreto
        #' @return La instancia del objeto
        ,err = function(code, ..., newCode=0) {
-         warning(mountMessage(code, ..., newCode))
+         text = private$mountMessage(code, ..., newCode)
+         stop(errorCondition(text, class=c("UMLR2Err", "error")))
        }
        #' @description Devuelve OK KO en funcion del dato pasado
        #' @param value dato a evaluar
@@ -58,7 +59,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param ... Informacion necesaria para el mensaje concreto
        #' @return La instancia del objeto
        ,plantErr         = function(code, ..., newCode=0) {
-            c <- errorCondition(text, class=c("UMLRErr", "error"))
+            c <- errorCondition(text, class=c("UMLR2Err", "error"))
             stop(c)
         }
     )

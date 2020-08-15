@@ -1,11 +1,19 @@
 #' La clase para interactuar con plantuml
 #' @title UMLR
 #' @docType class
-#' @name R6UMLR
+#' @name UMLR
 #' @description  La descripcion.
 #' @export
-UMLR = R6::R6Class("R6UMLR", inherit = PLANTUML,
-     public = list(
+library(R6)
+UMLR = R6Class("R6UMLR", inherit = PLANTUML,
+     active = list(
+         #' @field config Devuelve el objeto CONFIG
+         config = function(value) {
+           if (!missing(value)) private$msg$err("R012", "config")
+               super$config
+           }
+     )
+    ,public = list(
          #' @description Crea una instancia de la clase
          #' @param ...  named values para definir la configuración
          #' @return La instancia del objeto

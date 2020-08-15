@@ -17,9 +17,9 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
        #' @param ...  named values para definir la configuración
        #' @return La instancia del objeto
        initialize         = function( ...) {
-          if (substr(as.character(sys.call(-1))[1], 1, 6) == "PLANTUML") private$plantErr("E900")
+          if (substr(as.character(sys.call(-1))[1], 1, 6) == "PLANTUML") private$msg$err("E900")
           parms = unlist(list(...))
-          if (sum(names(parms) == "") > 0) private$plantErr("R103")
+          if (sum(names(parms) == "") > 0) private$msg$err("R103")
           private$cfg = CONFIG$new(parms)
        }
        #' @description destructor de la isntancia
@@ -32,20 +32,9 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
       #' @param ...  named values para definir la configuracion
       #' @return La instancia del objeto
       ,setConfig         = function(...) {
-         values = unlist(list(...))
-         if (length(values) == 0) return()
-         if (!is.character(values[1])) private$plantErr("R106")
-         parms = names(values)
-         if (sum(parms == "") > 0) private$plantErr("R105")
-         flags = names(values) %in% names(private$cfg)
-         noFlags = names(values)[!flags]
-         if (length(noFlags) > 0) private$plantErr("R104", noFlags)
-
-         nm = names(values) # tipo
-         eval(parse(text=paste0("private$cfg[\"", nm, "\"] = values[\"", nm, "\"]")))
-         if (!is.na(values["type"])) private$checkType(values["type"])
-         invisible(self)
-      }
+          private$cfg$setConfig(...)
+          invisible(self)
+       }
       #' @description Obtiene los datos de configuracion
       #' @return Una lista con los datos de configuracion
       ,getConfig         = function() { private$cfg }
@@ -104,7 +93,7 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
                                           ,f), stdout=TRUE, stderr=TRUE)
           )
           rc = ifelse(is.null(attr(private$res, "status")), 0, attr(private$res, "status"))
-          if (rc != 0) private$plantErr("E001", newCode=rc)
+          if (rc != 0) private$msg$err("E001", newCode=rc)
       }
       ,dataInline       = function(data) {
           private$inline = FALSE
@@ -135,7 +124,7 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
         }
 
         inFile = file.path(private$cfg$getInputDir(), inFile)
-        if (!file.exists(inFile)) private$plantErr("R205")
+        if (!file.exists(inFile)) private$msg$err("R205")
         inFile
       }
       # ,mountOutputFile  = function(umlFile, ext) {

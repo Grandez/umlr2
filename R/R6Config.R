@@ -13,7 +13,7 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
           if (substr(as.character(sys.call(-1))[1], 1, 6) == "PLANTUML") private$msg$err("E900")
           parms = unlist(list(...))
           if (sum(names(parms) == "") > 0) private$msg$err("R103")
-          self$setConfig(parms)
+          self$setConfig(...)
       }
       #' @description
       #'     Verifica la corrección de los datos de configuración de la clase.
@@ -47,7 +47,6 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msg$msg("I014"), appendLF = FALSE)
-          ext = self$getExt()
           rp = (self$getType() %in% private$types)
           if (verbose) message(private$msg$ok(rp))
           rc = rc && rp
@@ -60,7 +59,7 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msg$msg("I016"), appendLF = FALSE)
-          dd = self$getUmlDir()
+          dd = self$getInputDir()
           rp = (!is.null(dd) && dir.exists(dd))
           if (verbose) message(private$msg$ok(rp))
           rc = rc && rp
@@ -68,7 +67,7 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
 
           if (verbose) message(private$msg$msg("I017"), appendLF = FALSE)
           dd = self$getOutputDir()
-          rp = ifelse(is.null(dd), TRUE, dir.exists(dd))
+          rp = (!is.null(dd) && dir.exists(dd))
           if (verbose) message(private$msg$ok(rp))
           return (rc && rp)
       }
@@ -116,7 +115,6 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
           rc && rp
       }
       #' @description Cambia los datos de configuracion de la instancia
-      #' @family setters y getters
       #' @param ...  named values para definir la configuracion
       #' @return La instancia del objeto
       ,setConfig         = function(...) {
@@ -139,7 +137,6 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
       #' @family setters y getters
       #' @return Una lista con los datos de configuracion
       ,getConfig         = function() { private$cfg }
-
       #####################################################
       # Getters and setters
       #####################################################
@@ -158,15 +155,17 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
       #' @param real Si TRUE devuelve el valor real del directorio, si no el indicado (puede ser NULL)
       #' @return La ubicacion del directorio por defecto de las definiciones de diagramas
       ,getInputDir  = function(real = FALSE) {
-           if (is.null(private$cfg[["inputDir"]]) && real) return(tempdir)
-           private$cfg[["umlDir"]]
+           if (nchar(private$cfg[["inputDir"]]) > 0) return(private$cfg[["inputDir"]])
+           if (real) return(tempdir)
+           NULL
       }
       #' @description Devuelve la ubicacion del directorio por defecto de las imagenes de diagramas
       #' @param real Si TRUE devuelve el valor real del directorio, si no el indicado (puede ser NULL)
       #' @return La ubicacion del directorio por defecto de las imagenes de diagramas
       ,getOutputDir  = function(real = FALSE) {
-          if (is.null(private$cfg[["outputDir"]]) && real) return(tempdir)
-          private$cfg[["outputDir"]]
+          if (nchar(private$cfg[["outputDir"]]) > 0) return(private$cfg[["outputDir"]])
+          if (real) return(tempdir)
+          NULL
       }
       #' @description Devuelve la extensión por defecto para almacenar los ficheros de diagramas
       #' @family setters y getters
@@ -206,14 +205,14 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
       #'              Puede ser relativo o absoluto
       #' @param value El directorio por defecto donde buscar los ficheros de definiciones
       ,setInputDir  = function(value=NULL) {
-          private$cfg["inputDir"] = ifelse(is.null(value), NULL, private$checkString(value))
+          private$cfg["inputDir"] = ifelse(is.null(value), "", private$checkString(value))
           invisible(self)
       }
       #' @description Establece directorio donde guardar los diagramas
       #'              Puede ser relativo o absoluto
       #' @param value El directorio donde guardar los ficheros de definiciones
       ,setOutputDir  = function(value=NULL) {
-        private$cfg["outputDir"] = ifelse(is.null(value), NULL, private$checkString(value))
+        private$cfg["outputDir"] = ifelse(is.null(value), "", private$checkString(value))
         invisible(self)
       }
    )
@@ -223,12 +222,12 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
                  ,ext       = "uml"
                  ,type      = "png"
                  ,charset   = "utf-8"
-                 ,inputDir  = NULL
-                 ,outputDir = NULL
+                 ,inputDir  = ""    # Evitar Nulos
+                 ,outputDir = ""    # Evitar Nulos
       )
       ,types  = c("png", "jpg", "svg")
       ,checkType        = function (type) {
-        if (!(type %in% private$types)) private$plantErr("R107")
+        if (!(type %in% private$types)) private$msg$err("R107")
       }
       #############################################################
       ### Checkers
@@ -289,12 +288,12 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
       }
       ,checkString      = function(value) {
           if (missing(value) || is.null(value))
-              private$plantErr("R006")
+              private$msg$err("R006")
           if (!is.character(value) || length(value) != 1)
-              private$plantErr("R006")
+              private$msg$err("R006")
           trimmed = gsub("[[:space:]]", "", value)
           if (nchar(trimmed) == 0)
-              private$plantErr("R006")
+              private$msg$err("R006")
            trimmed
       }
    )
