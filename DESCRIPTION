@@ -1,6 +1,6 @@
 Package: umlr2
 Title: A class to integrate PlantUML diagrams into RMarkdown documents
-Version: 0.0.0.9004
+Version: 0.0.0.9014
 Authors@R: 
     person(given = "Javier",
            family = "Gonzalez",
@@ -9,7 +9,8 @@ Authors@R:
            comment = c(ORCID = "0000-0003-2477-3203"))
 Description: Class to mange UML diagrams generated using PlantUML project.
 Depends: 
-   R (>= 4.0.0)
+   R (>= 4.0.0),
+   R6
 Suggests: 
     knitr,
     rmarkdown,

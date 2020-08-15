@@ -1,22 +1,21 @@
-#' La clase para interactuar con plantuml
-#' @title R6Parser
+#' Parser de objetos de tipo R6
+#' @title ParserR6
 #' @docType class
-#' @description  La descripcion.
-#  Que opciones:
-#  basico - Solo la clase y lo publico
-#  simple - con accesors
-#  private - rpivado y public
-#
-# por bits
-#  UMLR$accesors + UMLR$private
-#' @export
+#' @name ParserR6
 ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
    public = list(
-       initialize = function(object, detail) {
-          private$detail = detail
-          private$object = object
+      #' @description Crea una instancia de la clase
+      #' @details **Esta clase no se puede instanciar**
+      #' @param object Instancia de objeto a analizar
+      #' @param detail Nivel de detalle segun UMLShow
+      #' @param deep   Nivel de profundidad del analisis
+      #' @return La instancia del objeto
+       initialize = function(object, detail, deep) {
+          super$initialize(object, detail, deep)
           private$.getGenerators()  # Generadores
        }
+       #' @description Ejecuta el analisis del objeto
+       #' @return La definiciondel diagrama
       ,parse = function() {
           c0 = class(private$object)[1]
           p = R6CLASS$new(private$generators[c0], c0, 0)
@@ -24,66 +23,53 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
           names(private$pend) = p$name
           private$process()
           private$generateDefinition()
-
       }
    )
    ,private = list(
-       object = NULL
-      ,detail = NULL
-      ,generators = NULL
-      ,pend  = NULL
-      ,hecho = list()  # Para obtener NA la primera vez
-      ,maxDeep = 0
+       generators = NULL
       ,process = function () {
-         det = private$detail
 
          while (length(private$pend) > 0) {
-            if (private$parseClass()) {
+            if (private$objSeen == 1) private$setFlags(FALSE)
+            processed = private$parseClass()
+            private$incObjects(processed)
+            if (processed) {
                private$hecho[[length(private$hecho) + 1]] = private$pend[[1]]
                nm = names(private$hecho)
                if (is.null(nm)) nm = c("")   # Primera vez
                nm[length(nm)] = names(private$pend)[1]
                names(private$hecho) = nm
-               if (length(private$hecho) > 0) {
-                  det1 = bitwAnd(det, UMLType$simple + UMLType$complete)
-                  if (bitwAnd(det, UMLType$classSimple)   > 0) det1 = bitwOr(det1,UMLType$simple)
-                  if (bitwAnd(det, UMLType$classComplete) > 0) det1 = bitwOr(det1,UMLType$complete)
-                  det = det1
-               }
             }
             private$pend[[1]] = NULL
          }
       }
       ,parseClass = function () {
-         cls = private$pend[[1]]
-         # Los siguientes estan al mismo nivel o superior
-         if (cls$deep > private$maxDeep) {
-            private$pend = NULL
-            return(FALSE)
-         }
+          cls = private$pend[[1]]
 
-         if (cls$name %in% names(private$hecho)) return (FALSE)
+          if (cls$deep > private$maxDeep) return(FALSE)
+          if (cls$name %in% names(private$hecho)) return (FALSE)
 
-         # Basico, obtener la informacion directamente de la clase
-         if (bitwAnd(private$detail,1) == 0) return (private$parseOutput(cls))
+          if (private$isBasic()) return (private$parseOutput(cls))
 
-         # Clase heredada. R6 no tiene multiple herencia
-         if (cls$deep < private$maxDeep) {
-            g = eval(parse(text=paste0(cls$name, "$get_inherit()")))
-            if (!is.null(g)) {
-               p = R6CLASS$new(private$generators[g$classname], g$classname, cls$deep + 1)
-               private$addClass(p)
-               cls$addParent(p)
-            }
-         }
-         # Fields & methods
-         private$addAttributes(cls, TRUE)
+          # Clase heredada. R6 no tiene multiple herencia
+          if (cls$deep < private$maxDeep) {
+              g = eval(parse(text=paste0(cls$name, "$get_inherit()")))
+              if (!is.null(g) && private$incSuperClass()) {
+                  p = R6CLASS$new(private$generators[g$classname], g$classname, cls$deep + 1)
+                  private$addClass(p)
+                  cls$addParent(p)
+              }
+          }
+          # Fields & methods
+          private$addAttributes(cls, TRUE)
 
-         if (bitwAnd(private$detail,2) > 0) private$addAttributes(cls, FALSE)
+          if (private$isComplete()) private$addAttributes(cls, FALSE)
 
-         private$.getComposition(cls)
-         private$.getAggregation(cls)
-         TRUE
+          if (private$incSubClass()) {
+             private$.getComposition(cls)
+             private$.getAggregation(cls)
+          }
+          TRUE
       }
       ,generateDefinition = function() {
          # Al menos hay uno
@@ -95,7 +81,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
       }
       ,parseOutput = function(cls) {
          if (cls$deep > 0) return (TRUE)
-         data = trimws(capture.output(private$obj))
+         data = trimws(capture.output(private$object))
          idx = grep("Public:", data, ignore.case=T)
          idxBeg = ifelse (length(idx) > 0, idx[1] + 1, 0)
          idx = grep("Private:", data, ignore.case=T)
@@ -156,6 +142,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
           private$generators = nm
       }
       ,.getComposition = function(cls) {
+         browser
          # Campos
          fields = eval(parse(text=paste0(cls$name, "$public_fields")))
          fields = c(fields, eval(parse(text=paste0(cls$name, "$private_fields"))))
@@ -169,7 +156,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
             hijos = unique(unlist(lapply(clases, function(x) x[[1]])))
             hijos = lapply(hijos, function(x) R6CLASS$new(private$generators[hijos], x, cls$deep + 1))
             names(hijos) = sapply(hijos, function(x) x$name)
-            cls$addComposition(hijos)
+            cls$addSubclasses(hijos, TRUE)
             private$addClass(hijos)
          }
 
@@ -180,7 +167,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
                hijos = lapply(hijos, function(x) { pos = which(private$generators == x)
                R6CLASS$new(x, names(private$generators)[pos], cls$deep + 1)})
             names(hijos) = sapply(hijos, function(x) x$name)
-            cls$addComposition(hijos)
+            cls$addSubclasses(hijos, TRUE)
             private$addClass(hijos)
          }
       }
@@ -202,7 +189,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
             R6CLASS$new(x, names(private$generators)[pos], cls$deep + 1)})
 
             names(hijos) = sapply(hijos, function(x) x$name)
-            cls$addAggregation(hijos)
+            cls$addSubclasses(hijos, FALSE)
             private$addClass(hijos)
          }
       }

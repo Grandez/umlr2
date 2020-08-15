@@ -1,46 +1,71 @@
+#' Encapsula la informacion de un objeto de tipo R6
+#' @title R6CLASS
+#' @docType class
 R6CLASS = R6::R6Class("R6CLASS",
     public = list(
+        #' @field name Nombre de la clase
         name = NULL
+        #' @field generator Generador de la clase
        ,generator = NULL
+        #' @field deep Nivel de profundidad en el analisis
        ,deep      = 0
+       #' @description Crea una instancia de la clase
+       #' @param name  Nombre de la clase
+       #' @param generator Objeto generados
+       #' @param deep Nivel de profundidad
+       #' @return La instancia del objeto
        ,initialize = function(name, generator, deep) {
            self$name = name
            self$generator = generator
            self$deep = deep
        }
+       #' @description Agrega el padre (superclase)
+       #' @param parent  Superclase
       ,addParent = function (parent) {
           private$parents[[length(private$parents) + 1]] = parent
           invisible(self)
       }
+      #' @description Agrega los atributos de la clase
+      #' @param fields  Los atributos a agregar
+      #' @param public TRUE si los atributos son publicos
       ,addFields = function(fields, public) {
-        if (public)  private$publicFields  = fields
-        if (!public) private$privateFields = fields
-        invisible(self)
+         if (public)  private$publicFields  = fields
+         if (!public) private$privateFields = fields
+         invisible(self)
       }
+      #' @description Agrega los metodos de la clase
+      #' @param methods  Los metodos a agregar
+      #' @param public TRUE si los metodos son publicos
       ,addMethods = function(methods, public) {
-        methods["initialize"] = NULL
-        methods["finalize"]   = NULL
-        methods["clone"]      = NULL
+          methods["initialize"] = NULL
+          methods["finalize"]   = NULL
+          methods["clone"]      = NULL
 
-        if (public)  {
-           # Separar getters y setters
-           private$publicMethods  = methods
-        }
-        if (!public) private$privateMethods  = methods
-        invisible(self)
+          if (public)  {
+             # Separar getters y setters
+             private$publicMethods  = methods
+          }
+          if (!public) private$privateMethods  = methods
+          invisible(self)
       }
+      #' @description Agrega los _active bindings_ de la clase
+      #' @param binds  _active bindings_
       ,addBindings = function(binds) {
          private$binds = names(binds)
          invisible(self)
       }
-      ,addComposition = function(hijos) {
-        private$composition = c(private$composition, hijos)
-        invisible(self)
+      #' @description Agrega subclases a la clase
+      #' @param subclasses  subclases que son parte de la clase
+      #' @param composition TRUE si son parte de ella
+      #'                    FALSE si son usadas dentro de ella
+      ,addSubclasses = function(subclasses, composition) {
+          if( composition) private$composition = c(private$composition, subclasses)
+          if(!composition) private$aggregated  = c(private$aggregated, subclasses)
+          invisible(self)
       }
-      ,addAggregation = function(hijos) {
-        private$aggregated = hijos
-        invisible(self)
-      }
+      #' @description Devuelve la definicion de la clase en formato S3PlantUML
+      #' @param detail  Nivel de detalle deseado
+      #' @return La definicion de la clase en formato S3PlantUML
       ,getClassDefinition = function(detail) {
           privF = NULL
           privM = NULL
@@ -49,17 +74,20 @@ R6CLASS = R6::R6Class("R6CLASS",
                    ,private$getBindings()
           )
           pubM = private$getMethodsDefinition(TRUE)
-          if (bitwAnd(detail,UMLType$complete) > 0) {
+          if (bitwAnd(detail,UMLShow$complete) > 0) {
               privF = private$getFieldsDefinition(FALSE)
               privM = private$getMethodsDefinition(FALSE)
           }
-
           c(cdef, privF, pubM, privM, "}")
       }
+      #' @description Devuelve la relacion de herencia si existe
+      #' @return La relacion de herencia si existe
       ,getParentsRelation = function() {
           if (length(private$parents) == 0) return ("")
           unlist(lapply(seq(1,length(private$parents)), function(x) paste(private$parents[[x]]$name, "<|--", self$name)))
       }
+      #' @description Devuelve la relacion de subclases si existen
+      #' @return La relacion de subclases si existen
       ,getSubclassesRelation = function() {
           data = c()
           if (length(private$composition) > 0) {

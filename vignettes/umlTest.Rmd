@@ -14,10 +14,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, echo=FALSE}
+```{r setup, echo = FALSE, eval=TRUE}
  #library(umlr2)
 files.r = list.files("../R", pattern="*\\.R$", full.names=TRUE, ignore.case=F)
-sapply(files.r, source)
+xx = sapply(files.r, source)
 
 plant = UMLR$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
 ```
@@ -33,9 +33,9 @@ Actualmente es posible procesar:
 El proceso general consiste en crear un objeto **UMLR** y ejecutar el metodo `plotClass`:
 
 ```{r, eval=FALSE, echo=TRUE}
-obj = Objeto$new()  # Object to plot
-uml =  UMLR$new()   # Get an instance of UMLR
-uml$plotClass(obj, detail=level_of_detail, deep=deep_level)
+# obj = Objeto$new()  # Object to plot
+# uml =  UMLR$new()   # Get an instance of UMLR
+# uml$plotClass(obj, detail=level_of_detail, deep=deep_level)
 ```
 
 # Detail
@@ -47,23 +47,20 @@ Este parametro define el detalle que se quiere generar de la clase.
 
 Supongamos la siguiente clase sencilla
 
-```{r}
+```{r, eval=TRUE}
 CLASS0 = R6::R6Class("R6CLASS0",
-   public = list(
-       initialize = function(...) { }
-       ,method0   = function()    { }
-   )
-   ,active  = list (
-       var0 = function(value) { }
-   )
-   ,private = list (
-        .var0 = NA
-       ,.method0 = function(data) {}
-   )
+ public = list(
+     initialize = function(...) { }
+     ,method0   = function()    { }
+ )
+ ,active  = list (
+     var0 = function(value) { }
+ )
+ ,private = list (
+      .var0 = NA
+     ,.method0 = function(data) {}
+ )
 )
-```
-
-```{r, echo=FALSE}
 c0 = CLASS0$new()
 ```
 
@@ -73,48 +70,47 @@ Nota que dado que no tiene herencia `basic` y `simple` son equivalentes
 
 | basic  | simple | complete |
 |:-:|:-:|:-:|
-| `r plant$plotClass(c0, UMLType$basic)` | `r plant$plotClass(c0, UMLType$simple)` | `r plant$plotClass(c0, UMLType$complete)` |
+| `r plant$plotClass(c0, UMLShow$basic)`|`r plant$plotClass(c0, UMLShow$simple)`|`r plant$plotClass(c0, UMLShow$complete)`|
 
 Creemos otra clase:
 
 ```{r}
-CLASS01 = R6::R6Class("R6CLASS01", inherit=CLASS0,
-   public = list(
-        attr11 = NULL
-       ,attr12 = NULL
-       ,initialize = function() {}
-       ,finalize   = function() {}
-       ,method11   = function() {}
-   )
-   ,private = list(
-        .priv11   = 1
-       ,.method11 = function(dato) {}
-   )
-)
-c01 = CLASS01$new()
+ CLASS01 = R6::R6Class("R6CLASS01", inherit=CLASS0,
+    public = list(
+         attr11 = NULL
+        ,attr12 = NULL
+        ,initialize = function() {}
+        ,finalize   = function() {}
+        ,method11   = function() {}
+    )
+    ,private = list(
+         .priv11   = 1
+        ,.method11 = function(dato) {}
+    )
+ )
+ c01 = CLASS01$new()
 ```
 
 
 | basic  | simple | complete |
 |:-:|:-:|:-:|
-| `r plant$plotClass(c01, UMLType$basic)` | `r plant$plotClass(c01, UMLType$simple)` | `r plant$plotClass(c01, UMLType$complete)` |
+|`r plant$plotClass(c01, UMLShow$basic)`|`r plant$plotClass(c01, UMLShow$simple)`|`r plant$plotClass(c01, UMLShow$complete)`|
 
 Incluimos las superclasses en el diagrama. 
 Para esto es necesario contemplar:
 
-- Activar el flag UMLType$parents
+- Activar el flag UMLShow$parents
 - Establecer el nivel de detalle deseado para las superclases que por defecto se establece a `basic` con `classSimple` o `classComplete`
 - Indicar un nivel de profundidad de busqueda de superclases, parametro `deep`
 
-Ejemplo: `plant$plotClass(clase, c(UMLType$complete,UMLType$parents,UMLType$simple), deep=1)`
+Ejemplo: `plant$plotClass(clase, c(UMLShow$complete,UMLShow$parents,UMLShow$simple), deep=1)`
 
 ```{r, echo=FALSE}
-  base = UMLType$complete + UMLType$parents
+   base = UMLShow$complete + UMLShow$parents
 ```
 | classBasic  | classSimple | classComplete |
 |:-:|:-:|:-:|
-| `r plant$plotClass(c01, base)` | `r plant$plotClass(c01, c(base,UMLType$classSimple))` | `r plant$plotClass(c01,c(base,UMLType$classComplete))` |
-
+|`r plant$plotClass(c01, base)`|`r plant$plotClass(c01, c(base,UMLShow$classSimple))`|`r plant$plotClass(c01,c(base,UMLShow$classComplete))`|
 
 Ahora creamos una clase con composicion y agregacion.
 La composicion se interpreta como las clases que se instancian junto con la propia clase
@@ -162,7 +158,7 @@ CLASS22 = R6::R6Class("R6CLASS22",
    )
 )
 
-CLASS1 = R6::R6Class("R6CLASS1", 
+CLASS1 = R6::R6Class("R6CLASS1",
    public = list(
         cls20 = NULL
        ,attr12 = NULL
@@ -178,18 +174,17 @@ CLASS1 = R6::R6Class("R6CLASS1",
 c1 = CLASS1$new()
 ```
 
-
 ```{r, echo=FALSE}
-  base = UMLType$complete + UMLType$subclasses
+  base = UMLShow$complete + UMLShow$subclasses
 ```
 ```{r echo=FALSE, fig.cap = "classBasic" }
-   plant$plotClass(c1, base)
+ plant$plotClass(c1, base)
 ``` 
 ```{r echo=FALSE, fig.cap="classSimple" }
-plant$plotClass(c1, c(base,UMLType$classSimple))
+ plant$plotClass(c1, c(base,UMLShow$classSimple))
 ```
 ```{r echo=FALSE, fig.cap="classComplete" }
-plant$plotClass(c1,c(base,UMLType$classComplete))
+ plant$plotClass(c1,c(base,UMLShow$classComplete))
 ``` 
 
 Caso completo
@@ -236,26 +231,28 @@ CLASS22 = R6::R6Class("R6CLASS22",
    )
 )
 
-CLASS1 = R6::R6Class("R6CLASS1", inherit = CLASS0,
-   public = list(
-        cls20 = NULL
-       ,attr12 = NULL
-       ,initialize = function() {cls20 = CLASS20$new()}
-       ,finalize   = function() {}
-       ,method11   = function() { cls = CLASS22$new()}
-   )
-   ,private = list(
-        .cls21   = CLASS21$new()
-       ,.method11 = function(dato) {}
-   )
-)
+ CLASS1 = R6::R6Class("R6CLASS1", inherit = CLASS0,
+    public = list(
+         cls20 = NULL
+        ,attr12 = NULL
+        ,initialize = function() {cls20 = CLASS20$new()}
+        ,finalize   = function() {}
+        ,method11   = function() { cls = CLASS22$new()}
+    )
+    ,private = list(
+         .cls21   = CLASS21$new()
+        ,.method11 = function(dato) {}
+    )
+ )
 c1 = CLASS1$new()
 ```
 
 
 ```{r, echo=FALSE}
-  base = UMLType$complete + UMLType$subclasses + UMLType$parents
+ base = UMLShow$complete + UMLShow$subclasses + UMLShow$parents
 ```
+
 ```{r echo=FALSE, fig.cap="classSimple" }
-plant$plotClass(c1, c(base,UMLType$classSimple), deep=5)
+ plant$plotClass(c1, c(base,UMLShow$classSimple), deep=5)
 ```
+
