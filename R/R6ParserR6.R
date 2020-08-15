@@ -1,7 +1,9 @@
 #' Parser de objetos de tipo R6
 #' @title ParserR6
-#' @docType class
 #' @name ParserR6
+#' @rdname ParserR6
+#' @docType class
+#' @aliases ParserR6
 ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
    public = list(
       #' @description Crea una instancia de la clase

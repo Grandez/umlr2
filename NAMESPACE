@@ -2,3 +2,4 @@
 
 export(UMLR)
 export(UMLR2Msg.getInstance)
+import(R6)

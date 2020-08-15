@@ -1,11 +1,12 @@
-#' Clase base
-#' @title UML2RBase
 #' @name UMLR2Base
-#' @aliases R6UMLR2Base
+#' @title UMLR2Base
+#' @rdname R6UMLR2BASE
 #' @docType class
-#' @description  Contiene los mensajes de error
+#' @description  Clase base del paquete.
+#'               Contiene los mensajes de error.
+#' @import R6
 library(R6)
-UMLR2Base = R6::R6Class("R6UMLR2Base"
+UMLR2Base = R6Class("R6UMLR2BASE"
    ,public = list(
        #' @description Inicializador
        initialize = function() {

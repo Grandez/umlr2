@@ -1,7 +1,7 @@
 #' Clase base de los parsers
 #' @title Parser
 #' @name Parser
-#' @aliases R6PARSER
+#' @rdname R6PARSER
 #' @docType class
 #' @description  Clase base para los parsers
 Parser = R6::R6Class("R6PARSER", inherit = UMLR2Base,

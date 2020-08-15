@@ -11,13 +11,10 @@ Description:
     This package allows create and use UML diagrams directly in a RMarkdown document.
     Also it is able to generate UML diagrams directly from R Classes.
 Depends: 
-   R (>= 4.0.0)
-Imports: 
-   R6
+   R (>= 4.0.0), R6
 Suggests: 
     knitr,
-    rmarkdown,
-    covr
+    rmarkdown
 SystemRequirements:
     PlantUML,
     Graphviz

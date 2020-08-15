@@ -1,7 +1,7 @@
 #' La clase para interactuar con plantuml
 #' @title PlantUML
-#' @name PLANTUML
-#' @aliases R6PLANTUML
+#' @name R6PLANTUML
+#' @aliases PLANTUML
 #' @docType class
 #' @description  La descripcion.
 PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
