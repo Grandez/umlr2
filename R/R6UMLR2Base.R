@@ -22,8 +22,9 @@ UMLR2Base = R6Class("R6UMLR2BASE"
        }
        #' @description Obtiene los datos de configuracion
        #' @return Una lista con los datos de configuracion
-       ,getConfig         = function() { private$cfg }
-
+       ,getConfig          = function() { private$cfg }
+       ,checkConfiguration = function(verbose=TRUE, first=FALSE) { private$cfg$checkConfiguration(verbose, first) }
+       ,checkInstallation  = function(verbose=TRUE, first=FALSE) { private$cfg$checkInstallation (verbose, first) }
     )
   ,private = list(S3Class = "S3PlantUML"
       ,msg = UMLR2Msg.getInstance()

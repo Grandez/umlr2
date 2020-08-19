@@ -21,6 +21,19 @@ Parser = R6::R6Class("R6PARSER", inherit = UMLR2Base,
             private$pend = NULL
             private$setFlags(TRUE)
         }
+        ,setObjects = function(objects) {
+            private$hecho = objects
+            invisible(self)
+        }
+        ,generateDefinition = function() {
+            # Al menos hay uno
+            classes = lapply(seq(1,length(private$hecho)), function(x) private$hecho[[x]]$getClassDefinition(private$detail))
+            parents = lapply(seq(1,length(private$hecho)), function(x) private$hecho[[x]]$getParentsRelation())
+            sons    = lapply(seq(1,length(private$hecho)), function(x) private$hecho[[x]]$getSubclassesRelation())
+
+            c(private$.header, unlist(classes), unlist(parents), unlist(sons))
+        }
+
     )
     ,private = list(
          object  = NULL

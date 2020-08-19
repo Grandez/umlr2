@@ -40,9 +40,12 @@ Files = R6::R6Class("R6Files", inherit = UMLR2Base,
        ,prepareData   = function(data, name, force) {
            self$file = NULL
            private$mountFileNames(data,name)
-           if (force) return (private$createTempFile(data, name))
+           #if (force) return (private$createTempFile(data, name))
            if (private$inline(data)) return (private$prepareInlineData(data,name))
-           if (!private$matchFile(data)) private$createTempFile(data)
+#           if (!private$matchFile(data)) private$createTempFile(data)
+           if (force) return (TRUE)
+           # Aqui el fichero bueno
+           TRUE
        }
        ,saveFile = function(fileName) {
           if (is.null(private$inFile)) return (fileName)
@@ -90,11 +93,10 @@ Files = R6::R6Class("R6Files", inherit = UMLR2Base,
               return (private$createTempFile(data))
           }
           if (nchar(private$cfg$getInputDir()) == 0) msg.err("E200")
-          f = private$getFullPath(filename, private$cfg$getInputDir(), private$cfg$getExt())
+          f = private$getFullPath(fileName, private$cfg$getInputDir(), private$cfg$getExt())
 
           if (!file.exists(f) || !private$matchMD5(data, f)) {
-              return (private$writeFile(data))
-              return (private$createTempFile(data))
+              return (private$writeFile(data, f))
           }
 
           fOut = private$getFullPath(filename, private$cfg$getOutputDir(), private$cfg$getType())
@@ -113,14 +115,14 @@ Files = R6::R6Class("R6Files", inherit = UMLR2Base,
             private$inFile = NULL
           }
           else {
-            private$infile = private$getFullPath(filename, private$cfg$getInputDir(), private$cfg$getExt())
+            private$inFile = private$getFullPath(fileName, private$cfg$getInputDir(), private$cfg$getExt())
             fileName = gsub("\\..+$", "", fileName)
-            private$outfile = private$getFullPath(filename, private$cfg$getOutputDir(), private$cfg$getType())
+            private$outFile = private$getFullPath(fileName, private$cfg$getOutputDir(), private$cfg$getType())
           }
       }
       ,getFullPath = function(filename, dirname, ext) {
           fullPath = filename
-          if (!isFullPath(filename)) fullPath = file.path(dirname, filename)
+          if (!private$isFullPath(filename)) fullPath = file.path(dirname, filename)
           if (length(grep(".", fullPath, fixed=TRUE))== 0 ) fullPath = paste(fullPath, ext, sep=".")
           fullPath
       }
@@ -129,6 +131,14 @@ Files = R6::R6Class("R6Files", inherit = UMLR2Base,
          if (substring(filename, 1,1) == "/") return (TRUE)
          if (nchar(filename) > 1 && substring(filename, 2,2) == ":") return(TRUE)
          FALSE
+      }
+      ,writeFile = function(data, fileName) {
+          tryCatch(writeLines(data,fileName)
+            ,error = function(e) {
+              private$msg$err("E111",e)
+            }
+          )
+          TRUE
       }
       ,createTempFile = function(data) {
            tryCatch({
@@ -153,7 +163,7 @@ Files = R6::R6Class("R6Files", inherit = UMLR2Base,
          (md5in == md5f)
      }
       ,changeExt = function(fName, newExt) {
-          rr = strsplit(f, "\\.")
+          rr = strsplit(fName, "\\.")
           if (length(rr[[1]]) >  1) rr[[1]][length(rr[[1]])] = newExt
           if (length(rr[[1]]) == 1) rr[[1]][2] = newExt
           paste(rr[[1]], collapse=".")

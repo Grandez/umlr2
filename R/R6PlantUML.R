@@ -22,7 +22,7 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
        }
        #' @description destructor de la isntancia
       ,finalize = function() {
-          files = gsub("\\..+$", "\\.\\*", private$files)
+          files = gsub("\\..+$", "\\.\\*", private$umlFiles)
           lista = list.files(tempdir(), files, full.names=TRUE)
           suppressWarnings(file.remove(lista))
       }
@@ -38,7 +38,7 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
 
    )
    ,private = list(
-       files  = list()      # Files generated
+       umlFiles  = list()      # Files generated
       ,res    = NULL         # Messages from plantuml
 
       ,callPlantUML     = function(umlFile) {
@@ -63,7 +63,7 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
            tryCatch({
                  fileName = tempfile(fileext=".uml")
                  writeLines(txt, fileName)
-                 private$files[length(private$files) + 1] = basename(fileName)
+                 private$umlFiles[length(private$umlFiles) + 1] = basename(fileName)
                  return (fileName)
               }
              ,error = function(e) {
@@ -71,5 +71,9 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
              }
            )
       }
+      ,removeUmlTags   = function (data) {
+         gsub("@startuml | @enduml", "", data, fixed=TRUE)
+      }
+
    )
 )

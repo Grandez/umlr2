@@ -43,17 +43,19 @@ UML = R6::R6Class("R6UML", inherit = PLANTUML,
        #' @param caption Titulo de la imagen
        #' @param force Fuerza a generar el diagrama aunque no haya cambiado
        #' @return la cadena del link
-       ,link              = function(data = NULL, name=NULL, caption = NULL, force = NULL) {
-           imgFile = private$makeImage(data, name, force)
-           target  = private$files$makeRelativeTo(imgFile, private$cfg$getOutputDir())
+       ,link              = function(data = NULL, name = NULL, caption = NULL, force = NULL) {
+           if (is.null(name)) private$msg$err("R296", "name")
+           target = private$makeImage(data, name, force)
+           #target  = private$files$makeRelativeTo(imgFile, private$cfg$getOutputDir())
            paste0('[![', caption, "](", target, " \'", caption, "\')](https://127.0.0.1)")
        }
        #' @description Almacena la definicion del diagrama en el sistema de archivos
        #' @param data  Definicion del diagrama o fichero con la misma
+       #' @param name  Nombre del fichero si los datos son en linea
        #' @param force Ignora la cache
-       #' @return fullpath del fichero
-       ,save               = function(data=NULL, force=NULL) {
-           private$makeImage(data, self$getType())
+       #' @return Path del fichero
+       ,save               = function(data=NULL, name=NULL, force=NULL) {
+           private$makeImage(data, name, force)
        }
        #' @description Carga un fichero de definicion de diagrama
        #' @param fileName  Path al fichero con la definicion
@@ -63,7 +65,7 @@ UML = R6::R6Class("R6UML", inherit = PLANTUML,
            if (!file.exists(fileName))  private$plantErr("E101", fileName)
            tryCatch({
                data = readLines(fileName)
-               structure(data, class = "S3PlantUML")
+               structure(data, class = private$S3Class)
            },error = function (e) {
                private$plantErr("E102", fileName)
            }
@@ -84,17 +86,15 @@ UML = R6::R6Class("R6UML", inherit = PLANTUML,
 
    )
    ,private = list(nada=NULL
+       ,files = NULL
        ,makeImage = function(data, name, force) {
            private$files$setConfig(private$cfg)
            rc = private$files$prepareData(data, name, ifelse(is.null(force), private$cfg$getForce(), force))
            if (!rc) return (private$files$getImageFile())
 
            dataDef = private$files$getDefinition(data)
-           imgFile = self$makeImage(dataDef)
+           imgFile = self$genDiagram(dataDef)
            private$files$saveFile(imgFile)
        }
-       ,removeUmlTags   = function (data) {
-           gsub("@startuml | @enduml", "", data, fixed=TRUE)
-        }
     )
 )

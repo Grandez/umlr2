@@ -43,6 +43,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param newCode Si existe reemplaza al anterior
        #' @param ... Informacion necesaria para el mensaje concreto
        ,err = function(code, ..., data=NULL, newCode=0) {
+         browser()
          text = private$mountMessage(code, ..., newCode)
          private$err2 = data
          stop(errorCondition(text, class=c("UMLR2Err", "error")))
@@ -110,10 +111,11 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,R203="force must be TRUE or FALSE"
        ,R204="This method requires a file"
        ,R205="Input file not found: %s"
+       ,R206="Parameter %s must be set"
        ,I001="Checking JVM machine \t"
-       ,I002="Checking Graphviz \t"
+       ,I002="Checking Graphviz \t\t"
        ,I003="Checking plantuml.jar \t"
-       ,I004="Checking execution \t"
+       ,I004="Checking execution \t\t"
        ,I005="Checking environment \t"
        ,I010="Checking configuration values:"
        ,I011="\tJVM\t\t\t"
@@ -126,8 +128,8 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,E001="Error generating diagram"
        ,E101="Invalid file name: %s"
        ,E102="Reading file name: %s"
-       ,E110="Error accessing to temporal directory"
-       ,E111="Error accessing config directories"
+       ,E110="Unable access to temporal directory"
+       ,E111="Unable access to config directories"
        ,E200="InputDir must be set to store diagrams"
        ,E900="This class is abstract"
    )

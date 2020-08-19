@@ -45,18 +45,11 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
          #'     - Si no se especifica type se asume el tipo de imagen definido en la instancia
          #'     - El fichero con la imagen no se almacena en el sistema de archivos
          ,umlClass             = function (object, detail=UMLShow$simple, deep = 1) {
-             detail = sum(detail)
-             # private$maxDeep = private$.setMaxDeep(detail, deep)
-             uml = NULL
-             if (isS4(object))      uml = ParserS4$new(object, detail, deep)$parse()
-             if (R6::is.R6(object)) uml = ParserR6$new(object, detail, deep)$parse()
-             if (is.null(uml)) warning("'object' is not an instance of S4 or R6 Classes")
-             names(uml) = NULL
-             uml
+             objs = private$parse(object, detail, deep)
+             parser = Parser$new(NULL, 0, 0)
+             parser$setObjects(objs)
+             parser$generateDefinition
          }
-#         ,plotPackage = function(object, detail=UMLShow$simple, deep = 1) {
-#
-#          }
            #' @description Agrega definiciones de PlantUML al inicio del documento
            #' @param header definiciones de PlantUML
          ,header = function(header) {
@@ -66,6 +59,69 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
 )
 ,private = list(
      .header = c("hide empty members", "hide empty fields")
+     ,mergeObjs = list()
+     ,parse  = function(object, detail, deep) {
+         objs = lapply(object, function(obj) private$parseObject(obj,detail,deep))
+         private$merge(objs)
+     }
+     ,parseObject = function(object, detail, deep) {
+       obj = NULL
+       detail = sum(detail)
+
+       if (isS4(object))      obj = ParserS4$new(object, detail, deep)
+       if (R6::is.R6(object)) obj = ParserR6$new(object, detail, deep)
+       if (is.null(obj)) {
+           warning("'object' is not an instance of S4 or R6 Classes")
+           return (NULL)
+       }
+       obj$parse()
+     }
+     ,merge = function(objs) {
+         result = objs[[1]]
+         names(result) = names(objs[[1]])
+         if (length(objs) == 1) return (result)
+         for (idx in 2:length(objs)) {
+            classesL = result
+            classesR = objs[[idx]]
+            namesL = sort(names(result))
+            namesR = sort(names(objs[[idx]]))
+            idxL = idxR = 1
+            private$mergeObjs = list()  # Evitar las copias
+
+            while (idxL <= length(namesL) && idxR <= length(namesR)) {
+               if (namesL[idxL] > namesR[idxR]) {
+                   private$add(classesR, namesR[idxR])
+                   idxR = idxR + 1
+                }
+                else if (namesL[idxL] < namesR[idxR]) {
+                    private$add(classesL, namesL[idxL])
+                    idxL = idxL + 1
+                 }
+                 else if (namesL[idxL] == namesR[idxR]) {
+                    if (classesL[[namesL[idxL]]]$detail >= classesR[[namesR[idxR]]]$detail) {
+                        private$add(classesL, namesL[idxL])
+                    }
+                    else {
+                       private$add(classesR, namesR[idxR])
+                    }
+                    idx1 = idx1 + 1
+                    idx2 = idx2 + 1
+                }
+            }
+            nobjs = private$add(classesL, tail(namesL, idxL * -1 ))
+            nobjs = private$add(classesR, tail(namesR, idxR * -1 ))
+            result = private$mergeObjs
+         }
+     }
+    ,add = function (objs, names) {
+        if (length(names) == 0) return()
+        for (name in names) {
+          nm = names(private$mergeObjs)
+          private$mergeObjs[length(private$mergeObjs) + 1] = objs[name]
+          nm = c(nm, name)
+          names(private$mergeObjs) = nm
+        }
+    }
 #    ,generators = NULL
 #    ,maxDeep = 0
     # ,getAttrs  = function (className, visibility) {

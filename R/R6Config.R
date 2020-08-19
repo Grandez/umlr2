@@ -3,7 +3,7 @@
 #' @docType class
 #' @description  La descripcion.
 #'
-CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
+CONFIG = R6::R6Class("R6CONFIG",
    public = list(
        #' @description Crea una instancia de la clase
        #' @details     Esta clase no puede ser instanciada
@@ -24,17 +24,18 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
       #' @return TRUE si la configuracion es correcta
       #'         FALSE en caso contrario
       ,checkConfiguration = function(verbose=TRUE, first=FALSE) {
+          txt = ""
           rc = TRUE
           if (verbose) message(private$msg$msg("I010"))
           if (verbose) message(private$msg$msg("I011"), appendLF = FALSE)
           rp = (nchar(self$getJVM()) != 0)
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(paste(private$msg$ok(rp), "-", self$getJVM()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msg$msg("I012"), appendLF = FALSE)
           rp = (nchar(self$getPlantUML()) != 0)
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(paste(private$msg$ok(rp), "-", self$getPlantUML()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
@@ -42,33 +43,37 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
           ext = self$getExt()
           rp = (nchar(ext) != 0)
           if (rp) rp = (substring(ext, 1, 1) != '.')
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(paste(private$msg$ok(rp), "-", self$getExt()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msg$msg("I014"), appendLF = FALSE)
           rp = (self$getType() %in% private$types)
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(paste(private$msg$ok(rp), "-", self$getType()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msg$msg("I015"), appendLF = FALSE)
           rp = (nchar(self$getCharset()) != 0)
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(paste(private$msg$ok(rp), "-", self$getCharset()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msg$msg("I016"), appendLF = FALSE)
           dd = self$getInputDir()
-          rp = (!is.null(dd) && dir.exists(dd))
-          if (verbose) message(private$msg$ok(rp))
+          txt = ifelse(is.null(dd) || nchar(dd) == 0, "Not set", dd)
+          rp  = ifelse(is.null(dd) || nchar(dd) == 0, TRUE, dir.exists(dd))
+
+          if (verbose) message(paste(private$msg$ok(rp), "-", txt))
+          txt = ""
           rc = rc && rp
           if (first && !rc) return(rc)
 
           if (verbose) message(private$msg$msg("I017"), appendLF = FALSE)
           dd = self$getOutputDir()
-          rp = (!is.null(dd) && dir.exists(dd))
-          if (verbose) message(private$msg$ok(rp))
+          txt = ifelse(is.null(dd) || nchar(dd) == 0, "Not set", dd)
+          rp = ifelse(is.null(dd) || nchar(dd) == 0, TRUE, dir.exists(dd))
+          if (verbose) message(paste(private$msg$ok(rp), "-", txt))
           return (rc && rp)
       }
       #' @description Verifica la correccion de la instalacion. Es decir, si todos los
@@ -280,8 +285,9 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
         file = basename(tempfile())
         link=NULL
         tryCatch ({
-          link = self$image(private$testData)
-          file.remove(strsplit(link, "[()]")[[1]][2])
+          writeLines(c("Test 1", "Test 2"), file)
+          if (!file.exists(file)) return (FALSE)
+          file.remove(file)
         }
         ,error = function(e) return (FALSE)
         )

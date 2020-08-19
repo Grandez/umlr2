@@ -24,7 +24,8 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
           private$pend = list(p)
           names(private$pend) = p$name
           private$process()
-          private$generateDefinition()
+          private$hecho
+          #private$generateDefinition()
       }
    )
    ,private = list(
@@ -72,14 +73,6 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
              private$.getAggregation(cls)
           }
           TRUE
-      }
-      ,generateDefinition = function() {
-         # Al menos hay uno
-         classes = lapply(seq(1,length(private$hecho)), function(x) private$hecho[[x]]$getClassDefinition(private$detail))
-         parents = lapply(seq(1,length(private$hecho)), function(x) private$hecho[[x]]$getParentsRelation())
-         sons    = lapply(seq(1,length(private$hecho)), function(x) private$hecho[[x]]$getSubclassesRelation())
-
-         c(private$.header, unlist(classes), unlist(parents), unlist(sons))
       }
       ,parseOutput = function(cls) {
          if (cls$deep > 0) return (TRUE)
