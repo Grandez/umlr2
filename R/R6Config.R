@@ -225,6 +225,7 @@ CONFIG = R6::R6Class("R6CONFIG", inherit = UMLR2Base,
                  ,inputDir  = ""    # Evitar Nulos
                  ,outputDir = ""    # Evitar Nulos
       )
+      ,force = FALSE
       ,types  = c("png", "jpg", "svg")
       ,checkType        = function (type) {
         if (!(type %in% private$types)) private$msg$err("R107")

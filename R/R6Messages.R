@@ -42,11 +42,23 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param code Codigo de error
        #' @param newCode Si existe reemplaza al anterior
        #' @param ... Informacion necesaria para el mensaje concreto
-       #' @return La instancia del objeto
-       ,err = function(code, ..., newCode=0) {
+       ,err = function(code, ..., data=NULL, newCode=0) {
          text = private$mountMessage(code, ..., newCode)
+         private$err2 = data
          stop(errorCondition(text, class=c("UMLR2Err", "error")))
        }
+       #' @description Almacena informacion extendida de un error
+       #' @param desc mensajes de error
+       ,setExtErr = function (desc) {
+           private$err2 = desc
+           invisible(self)
+       }
+       #' @description Almacena informacion extendida de un error
+       #' @param desc mensajes de error
+       ,getExtErr = function () {
+           private$err2
+       }
+
        #' @description Devuelve OK KO en funcion del dato pasado
        #' @param value dato a evaluar
        #' @return OK/KO
@@ -64,7 +76,8 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
         }
     )
   ,private = list(
-      mountMessage = function(code, ..., newCode=0) {
+       err2 = ""
+      ,mountMessage = function(code, ..., newCode=0) {
        if (newCode != 0) {
          text = sprintf("UMLRE%03d - %s", newCode, private$msgErr[code])
        }
@@ -113,6 +126,9 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,E001="Error generating diagram"
        ,E101="Invalid file name: %s"
        ,E102="Reading file name: %s"
+       ,E110="Error accessing to temporal directory"
+       ,E111="Error accessing config directories"
+       ,E200="InputDir must be set to store diagrams"
        ,E900="This class is abstract"
    )
   )
