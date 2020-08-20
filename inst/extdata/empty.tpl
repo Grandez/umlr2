@@ -1,0 +1,2 @@
+skinparam Class {
+}

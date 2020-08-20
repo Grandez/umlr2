@@ -4,7 +4,7 @@
 #' @aliases Files
 #' @docType class
 #' @description  La descripcion.
-Files = R6::R6Class("R6Files", inherit = UMLR2Base,
+Files = R6::R6Class("R6Files", inherit = UMLR2BASE,
     public = list(
        #' @field file Fullpath del fichero a procesar
         file = NULL
@@ -16,7 +16,7 @@ Files = R6::R6Class("R6Files", inherit = UMLR2Base,
        #' @param ...  named values para definir la configuración
        #' @return La instancia del objeto
        ,initialize         = function(config) {
-           #if (substr(as.character(sys.call(-1))[1], 1, 5) == "Files") private$msg$err("E900")
+           #if (substr(as.character(sys.call(-1))[1], 1, 5) == "Files") private$msg$err("E900", "Files")
            if (!missing(config)) private$cfg = config
        }
        ,getDefinition = function(data) {

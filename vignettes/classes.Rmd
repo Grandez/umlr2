@@ -1,5 +1,5 @@
 ---
-title: "Creatng UML diagrams"
+title: "Documenting R Classes"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Documenting R Classes}
@@ -11,23 +11,24 @@ vignette: >
 LOCAL <- identical(Sys.getenv("R_LOCAL"), "TRUE")
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  purl = LOCAL
 )
 ```
 
 ```{r setup, echo = FALSE}
-source("../R/R6Messages.R")
-source("../R/R6Config.R")
-source("../R/R6UMLR2Base.R")
+
  #library(umlr2)
+source("../R/R6UMLREnum.R")
+source("../R/R6Messages.R")
+source("../R/R6Template.R")
+source("../R/R6Config.R")
+source("../R/R6UMLRBase.R")
 files.r = list.files("../R", pattern="*\\.R$", full.names=TRUE, ignore.case=F)
-# for (i in files.r) {
-#   print(i)
-#   source(i)
-# }
 xx = sapply(files.r, source)
 
 uml = UML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+umlr = UMLR$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
 ```
 
 # Intro
@@ -40,42 +41,29 @@ Actualmente es posible procesar:
 
 El proceso general consiste en crear un objeto **UMLR** y ejecutar el metodo `plotClass`:
 
-# Detail
-
-Este parametro define el detalle que se quiere generar de la clase.
-
-
-# Instalacion
-
 ```{r}
-#uml$checkInstallation()
+ umlr$plotClass(c(uml, umlr), UMLShow$basic)
 ```
 
+simple
+
 ```{r}
-testData="@startuml
-                    [*]-->STATE1
-                 @enduml"
-
-uml$plot(testData)
-
+ umlr$plotClass(c(uml, umlr), UMLShow$simple)
 ```
 
 
+con padres
 ```{r}
-uml = UML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar", inputDir="uml", outputDir="img")
-uml$plot(testData)
-
+base = UMLShow$complete + UMLShow$superClasses
+ umlr$plotClass(c(uml, umlr), base)
 ```
 
-Con link
+completo
 
-r uml$link(testData, "example", "prueba")
-
-
-
-[<img src="http://www.google.com.au/images/nav_logo7.png">](http://google.com.au/)
-
-
+```{r}
+base = UMLShow$complete + UMLShow$superClasses + UMLShow$subClasses
+ umlr$plotClass(c(uml, umlr), base, deep=10)
+```
 
 
 

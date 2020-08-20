@@ -32,9 +32,9 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
          #' @details
          #'     - Si no se especifica type se asume el tipo de imagen definido en la instancia
          #'     - El fichero con la imagen no se almacena en el sistema de archivos
-         ,plotClass             = function (object, detail=UMLShow$simple, deep = 1) {
+         ,plotClass             = function (object, detail=UMLShow$simple, deep = 100) { # deep = .Machine$integer.max) {
               uml = self$umlClass(object, detail, deep)
-              imgFile = private$makeImage(uml)
+              imgFile = self$genDiagram(uml, private$.parser$getSummary())
               knitr::include_graphics(normalizePath(imgFile))
          }
          #' @description Genera la definicion del diagrama a partir de la instancia del objeto
@@ -44,11 +44,10 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
          #' @details
          #'     - Si no se especifica type se asume el tipo de imagen definido en la instancia
          #'     - El fichero con la imagen no se almacena en el sistema de archivos
-         ,umlClass             = function (object, detail=UMLShow$simple, deep = 1) {
+         ,umlClass             = function (object, detail=UMLShow$simple, deep = 100) {
              objs = private$parse(object, detail, deep)
-             parser = Parser$new(NULL, 0, 0)
-             parser$setObjects(objs)
-             parser$generateDefinition
+             private$.parser$setObjects(objs)
+             private$.parser$generateDefinition()
          }
            #' @description Agrega definiciones de PlantUML al inicio del documento
            #' @param header definiciones de PlantUML
@@ -59,7 +58,7 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
 )
 ,private = list(
      .header = c("hide empty members", "hide empty fields")
-     ,mergeObjs = list()
+     ,.parser = PARSER$new(NULL, 0, 0)
      ,parse  = function(object, detail, deep) {
          objs = lapply(object, function(obj) private$parseObject(obj,detail,deep))
          private$merge(objs)
@@ -76,6 +75,8 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
        }
        obj$parse()
      }
+     # Version que solo maneja caracteres
+
      ,merge = function(objs) {
          result = objs[[1]]
          names(result) = names(objs[[1]])
@@ -84,35 +85,71 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
             classesL = result
             classesR = objs[[idx]]
             namesL = sort(names(result))
-            namesR = sort(names(objs[[idx]]))
+            namesR = sort(names(classesR))
+            sizeL = length(namesL)
+            sizeR = length(namesR)
+            selL = seq(1,sizeL)
+            selR = seq(1,sizeR)
             idxL = idxR = 1
-            private$mergeObjs = list()  # Evitar las copias
 
-            while (idxL <= length(namesL) && idxR <= length(namesR)) {
-               if (namesL[idxL] > namesR[idxR]) {
-                   private$add(classesR, namesR[idxR])
-                   idxR = idxR + 1
-                }
-                else if (namesL[idxL] < namesR[idxR]) {
-                    private$add(classesL, namesL[idxL])
-                    idxL = idxL + 1
-                 }
-                 else if (namesL[idxL] == namesR[idxR]) {
-                    if (classesL[[namesL[idxL]]]$detail >= classesR[[namesR[idxR]]]$detail) {
-                        private$add(classesL, namesL[idxL])
-                    }
-                    else {
-                       private$add(classesR, namesR[idxR])
-                    }
-                    idx1 = idx1 + 1
-                    idx2 = idx2 + 1
-                }
+            while (idxL <= sizeL && idxR <= sizeR) {
+                if      (namesL[idxL] > namesR[idxR]) idxR = idxR + 1
+                else if (namesL[idxL] < namesR[idxR]) idxL = idxL + 1
+                     else {  # Iguales
+                       detL = classesL[[namesL[idxL]]]$detail
+                       detR = classesR[[namesR[idxR]]]$detail
+                       if (detL >= detR) selR[idxR] = 0
+                       else              selL[idxL] = 0
+                       idxL = idxL + 1
+                       idxR = idxR + 1
+                     }
             }
-            nobjs = private$add(classesL, tail(namesL, idxL * -1 ))
-            nobjs = private$add(classesR, tail(namesR, idxR * -1 ))
-            result = private$mergeObjs
+            result = c(classesL[namesL[selL]], classesR[namesR[selR]])
+            names(result) =  c(namesL[selL], namesR[selR])
+            # nobjs = private$add(classesL, tail(namesL, idxL * -1 ))
+            # nobjs = private$add(classesR, tail(namesR, idxR * -1 ))
+            # result = private$mergeObjs
          }
+         result
      }
+     # ,merge = function(objs) {
+     #   result = objs[[1]]
+     #   names(result) = names(objs[[1]])
+     #   if (length(objs) == 1) return (result)
+     #   for (idx in 2:length(objs)) {
+     #     classesL = result
+     #     classesR = objs[[idx]]
+     #     namesL = sort(names(result))
+     #     namesR = sort(names(objs[[idx]]))
+     #     idxL = idxR = 1
+     #     private$mergeObjs = list()  # Evitar las copias
+     #
+     #     while (idxL <= length(namesL) && idxR <= length(namesR)) {
+     #       if (namesL[idxL] > namesR[idxR]) {
+     #         private$add(classesR, namesR[idxR])
+     #         idxR = idxR + 1
+     #       }
+     #       else if (namesL[idxL] < namesR[idxR]) {
+     #         private$add(classesL, namesL[idxL])
+     #         idxL = idxL + 1
+     #       }
+     #       else if (namesL[idxL] == namesR[idxR]) {
+     #         if (classesL[[namesL[idxL]]]$detail >= classesR[[namesR[idxR]]]$detail) {
+     #           private$add(classesL, namesL[idxL])
+     #         }
+     #         else {
+     #           private$add(classesR, namesR[idxR])
+     #         }
+     #         idx1 = idx1 + 1
+     #         idx2 = idx2 + 1
+     #       }
+     #     }
+     #     nobjs = private$add(classesL, tail(namesL, idxL * -1 ))
+     #     nobjs = private$add(classesR, tail(namesR, idxR * -1 ))
+     #     result = private$mergeObjs
+     #   }
+     # }
+
     ,add = function (objs, names) {
         if (length(names) == 0) return()
         for (name in names) {

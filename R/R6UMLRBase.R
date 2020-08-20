@@ -6,11 +6,11 @@
 #'               Contiene los mensajes de error.
 #' @import R6
 library(R6)
-UMLR2Base = R6Class("R6UMLR2BASE"
+UMLR2BASE = R6Class("R6UMLR2BASE"
    ,public = list(
        #' @description Inicializador
        initialize = function(...) {
-          if (substr(as.character(sys.call(-1))[1], 1, 9) == "UMLR2Base") private$plantErr("E900")
+          if (substr(as.character(sys.call(-1))[1], 1, 9) == "UMLR2BASE") private$plantErr("E900", "UMLR2BASE")
           private$cfg = CONFIG$new(...)
        }
        #' @description Cambia los datos de configuracion de la instancia

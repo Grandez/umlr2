@@ -4,7 +4,7 @@
 #' @rdname ParserR6
 #' @docType class
 #' @aliases ParserR6
-ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
+ParserR6 = R6::R6Class("R6PARSERR6", inherit = PARSER,
    public = list(
       #' @description Crea una instancia de la clase
       #' @details **Esta clase no se puede instanciar**
@@ -20,7 +20,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
        #' @return La definiciondel diagrama
       ,parse = function() {
           c0 = class(private$object)[1]
-          p = R6CLASS$new(private$generators[c0], c0, 0)
+          p = R6CLASS$new(private$generators[c0], c0, private$detail, 0, 1)
           private$pend = list(p)
           names(private$pend) = p$name
           private$process()
@@ -58,7 +58,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
           if (cls$deep < private$maxDeep) {
               g = eval(parse(text=paste0(cls$name, "$get_inherit()")))
               if (!is.null(g) && private$incSuperClass()) {
-                  p = R6CLASS$new(private$generators[g$classname], g$classname, cls$deep + 1)
+                  p = R6CLASS$new(private$generators[g$classname], g$classname, private$detail, cls$deep + 1, 2)
                   private$addClass(p)
                   cls$addParent(p)
               }
@@ -149,7 +149,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
          # Cogemos los primeros
          if (length(clases) > 0) {
             hijos = unique(unlist(lapply(clases, function(x) x[[1]])))
-            hijos = lapply(hijos, function(x) R6CLASS$new(private$generators[hijos], x, cls$deep + 1))
+            hijos = lapply(hijos, function(x) R6CLASS$new(private$generators[hijos], x, private$detail, cls$deep + 1, 4))
             names(hijos) = sapply(hijos, function(x) x$name)
             cls$addSubclasses(hijos, TRUE)
             private$addClass(hijos)
@@ -160,7 +160,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
             hijos = unique(hijos)
             pos =
                hijos = lapply(hijos, function(x) { pos = which(private$generators == x)
-               R6CLASS$new(x, names(private$generators)[pos], cls$deep + 1)})
+               R6CLASS$new(x, names(private$generators)[pos], private$detail, cls$deep + 1)})
             names(hijos) = sapply(hijos, function(x) x$name)
             cls$addSubclasses(hijos, TRUE)
             private$addClass(hijos)
@@ -181,7 +181,7 @@ ParserR6 = R6::R6Class("R6PARSERR6", inherit = Parser,
          if (length(hijos) > 0) {
             hijos = unique(hijos)
             hijos = lapply(hijos, function(x) { pos = which(private$generators == x)
-            R6CLASS$new(x, names(private$generators)[pos], cls$deep + 1)})
+            R6CLASS$new(x, names(private$generators)[pos], private$detail, cls$deep + 1)})
 
             names(hijos) = sapply(hijos, function(x) x$name)
             cls$addSubclasses(hijos, FALSE)

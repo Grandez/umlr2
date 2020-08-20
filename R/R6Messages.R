@@ -20,7 +20,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @return La instancia del objeto
        initialize         = function() {
            call = as.character(sys.call(-2))
-           if (call != "UMLR2Msg.getInstance") self$plantErr("E900")
+           if (call != "UMLR2Msg.getInstance") self$plantErr("E900", "UMLR2SG")
        }
        #' @description Genera un mensaje desde la tabla de mensajes
        #' @param code Codigo de error
@@ -43,7 +43,6 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param newCode Si existe reemplaza al anterior
        #' @param ... Informacion necesaria para el mensaje concreto
        ,err = function(code, ..., data=NULL, newCode=0) {
-         browser()
          text = private$mountMessage(code, ..., newCode)
          private$err2 = data
          stop(errorCondition(text, class=c("UMLR2Err", "error")))
@@ -131,7 +130,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,E110="Unable access to temporal directory"
        ,E111="Unable access to config directories"
        ,E200="InputDir must be set to store diagrams"
-       ,E900="This class is abstract"
+       ,E900="class %s is abstract"
    )
   )
 )

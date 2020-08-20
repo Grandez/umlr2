@@ -2,7 +2,7 @@
 #' @title ParserS4r
 #' @docType class
 #' @name ParserS4
-ParserS4 = R6::R6Class("R6PARSERS4", inherit = Parser,
+ParserS4 = R6::R6Class("R6PARSERS4", inherit = PARSER,
    public = list(
       #' @description Crea una instancia de la clase
       #' @details **Esta clase no se puede instanciar**

@@ -5,6 +5,12 @@ testData="@startuml
                     [*]-->STATE1
                  @enduml"
 
-browser()
 uml = UML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+#rc = uml$checkInstallation()
+
+
 uml$plot(testData)
+
+browser()
+uml = UML$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar", inputDir="uml", outputDir="img")
+uml$link(testData, "example", "prueba")

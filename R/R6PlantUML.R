@@ -4,7 +4,7 @@
 #' @aliases PLANTUML
 #' @docType class
 #' @description  La descripcion.
-PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
+PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2BASE,
    active = list(
      #' @field config Devuelve el objeto CONFIG
       config = function(value) {
@@ -30,17 +30,29 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
       #'              generado a partir de los datos pasados
       #' @param data  Un objeto S3PlantUML o un vector de lineas interpretables por PlantUML
       #' @return El nombre del fichero con el diagrama
-      ,genDiagram      = function(data) {
-          umlFile = private$prepareFile(data)
+      ,genDiagram      = function(data, summary) {
+          header = private$tpl$generate(summary)
+          umlData = c(header, data)
+          if (length(grep("@startuml", umlData, fixed = TRUE)) == 0) {
+             umlData = c("@startuml \n", umlData, "\n@enduml \n")
+          }
+          umlFile = private$prepareFile(umlData)
           private$callPlantUML(umlFile)
           gsub("uml$", "png", umlFile)
+      }
+      #' @description Inserta un nuevo fichero de plantilla a la lista
+      #' @param template  El nombre del fichero
+      #' @param force     Si TRUE elimina los existentes
+      ,addTemplate = function(template = NULL, replace = FALSE) {
+           if(!is.null(template)) private$tpl$dd(template)
+           invisible(self)
       }
 
    )
    ,private = list(
        umlFiles  = list()      # Files generated
       ,res    = NULL         # Messages from plantuml
-
+      ,tpl    = TEMPLATE$new()
       ,callPlantUML     = function(umlFile) {
           # Si la llamada es correcta no informa status
           private$res = suppressWarnings( system2( private$cfg$getJVM()
@@ -54,15 +66,9 @@ PLANTUML = R6::R6Class("R6PLANTUML", inherit = UMLR2Base,
           if (rc != 0) private$msg$err("E001", newCode=rc)
       }
       ,prepareFile      = function(data) {
-           txt = data
-           if (is.list(data)) txt = unlist(data)
-           if (length(txt) > 1) txt = paste(txt, collapse="\n")
-           if (length(grep("@startuml", txt, fixed = TRUE)) == 0) {
-               txt = paste("@startuml \n", txt, "\n@enduml \n")
-           }
            tryCatch({
                  fileName = tempfile(fileext=".uml")
-                 writeLines(txt, fileName)
+                 writeLines(data, fileName)
                  private$umlFiles[length(private$umlFiles) + 1] = basename(fileName)
                  return (fileName)
               }

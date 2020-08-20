@@ -3,22 +3,35 @@
 #' @docType class
 R6CLASS = R6::R6Class("R6CLASS",
     public = list(
-        #' @field name Nombre de la clase
+       #' @field name Nombre de la clase
         name = NULL
-        #' @field generator Generador de la clase
+       #' @field generator Generador de la clase
        ,generator = NULL
-        #' @field deep Nivel de profundidad en el analisis
-       ,deep      = 0
+       #' @field detail Nivel de detalle
+       ,detail      = 0
+       #' @field deep Nivel de profundidad
+       # Necesario para evitar la recursividad
+       ,deep  = 0
+       #' @field type Tipo de clase (main, super, sub) 1 - 2 - 4
+       ,type = 0
        #' @description Crea una instancia de la clase
        #' @param name  Nombre de la clase
        #' @param generator Objeto generados
-       #' @param deep Nivel de profundidad
+       #' @param detail Nivel de profundidad
        #' @return La instancia del objeto
-       ,initialize = function(name, generator, deep) {
-           self$name = name
+       ,initialize = function(name, generator, detail, deep, type = 0) {
+           self$name      = name
            self$generator = generator
-           self$deep = deep
+           self$detail    = detail
+           self$deep      = deep
+           self$type      = type
        }
+       ,setType = function(type) {
+         self$type = bitwOr(self$type, type)
+       }
+       ,isClass      = function() as.logical(bitwAnd(self$type, 1))
+       ,isSuperclass = function() as.logical(bitwAnd(self$type, 2))
+       ,isSubclass   = function() as.logical(bitwAnd(self$type, 4))
        #' @description Agrega el padre (superclase)
        #' @param parent  Superclase
       ,addParent = function (parent) {
@@ -102,8 +115,7 @@ R6CLASS = R6::R6Class("R6CLASS",
       }
     )
     ,private = list(
-         detail = 254 # .UMLRDefs$new()
-        ,parents = list()
+         parents = list()
         ,publicFields   = NULL
         ,publicMethods  = NULL
         ,privateFields  = NULL

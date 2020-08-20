@@ -1,6 +1,6 @@
 Package: UMLR2
 Title: Create UML diagramas into RMarkdown documents
-Version: 0.0.14.202008
+Version: 0.2.21.202008
 Authors@R: 
     person(given = "Javier",
            family = "Gonzalez",
