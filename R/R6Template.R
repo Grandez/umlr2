@@ -15,6 +15,7 @@ TEMPLATE = R6::R6Class("R6TEMPLATE"
       #' @param data  Un objeto S3PlantUML o un vector de lineas interpretables por PlantUML
       #' @return El nombre del fichero con el diagrama
       ,generate      = function(summary) {
+         if (length(private$tplFiles) == 0) return (NULL)
           vars = VARS$new()
           skinparam = readLines(private$tplFiles[[1]])
 
@@ -28,7 +29,8 @@ TEMPLATE = R6::R6Class("R6TEMPLATE"
    ,private = list(
        #tplFiles  = list(system.file("extdata", "default.tpl", package = "UMLR2"))
       # Falla en desarrollo
-      tplFiles  = list("P:/R/umlr2/inst/extdata/default.tpl")
+      #tplFiles  = list("P:/R/umlr2/inst/extdata/default.tpl")
+      tplFiles  = list()
       ,process = function(skinparam, classes, tag) {
          if (is.null(classes)) return (skinparam)
          c(sapply(classes, function(x) gsub(tag, x, skinparam, ignore.case=TRUE)))

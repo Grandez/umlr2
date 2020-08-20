@@ -54,14 +54,14 @@ PARSER = R6::R6Class("R6PARSER", inherit = UMLR2BASE,
             if (deep > 0) deep = deep - 1
             res = ifelse(detail < UMLShow$superClasses, 0, deep)
             if (bitwAnd(detail, UMLShow$superClasses) > 0 && res == 0) res = 1
-            if (bitwAnd(detail, UMLShow$subclasses)   > 0 && res == 0) res = 1
+            if (bitwAnd(detail, UMLShow$subClasses)   > 0 && res == 0) res = 1
             res
         }
         ,isBasic       = function() { private$det == 0 }
         ,isSimple      = function() { private$det > 0 && bitwAnd(private$det, UMLShow$complete) == 0}
         ,isComplete    = function() { bitwAnd(private$det, UMLShow$complete)     > 0 }
         ,incSuperClass = function() { bitwAnd(private$inc, UMLShow$superClasses) > 0 }
-        ,incSubClass   = function() { bitwAnd(private$inc, UMLShow$subclasses)   > 0 }
+        ,incSubClass   = function() { bitwAnd(private$inc, UMLShow$subClasses)   > 0 }
         ,setFlags = function(base) {
             #  Nibbles: 1 = 15, 2 = 240, 3 = 3840
             flags = ifelse(base, 15, 3840)

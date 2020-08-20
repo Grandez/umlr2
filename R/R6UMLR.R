@@ -66,7 +66,6 @@ UMLR = R6Class("R6UMLR", inherit = PLANTUML,
      ,parseObject = function(object, detail, deep) {
        obj = NULL
        detail = sum(detail)
-
        if (isS4(object))      obj = ParserS4$new(object, detail, deep)
        if (R6::is.R6(object)) obj = ParserR6$new(object, detail, deep)
        if (is.null(obj)) {

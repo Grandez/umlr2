@@ -36,7 +36,7 @@ UMLShow = .RUMLENUM(
     ,simple        =   1   # Solo los datos publicos propios
     ,complete      =   2   # Info privada
     ,superClasses  =  16   # Padre si existe
-    ,subclasses    =  32   # Clases usadas si existen
+    ,subClasses    =  32   # Clases usadas si existen
     ,classSimple   = 256   #
     ,classComplete = 512
 )
