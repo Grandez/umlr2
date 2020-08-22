@@ -40,3 +40,10 @@ UMLShow = .RUMLENUM(
     ,classSimple   = 256   #
     ,classComplete = 512
 )
+
+ClassType = .RUMLENUM(
+     unknow     = 0
+    ,class      = 1
+    ,superClass = 2
+    ,subClass   = 4
+)

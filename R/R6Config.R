@@ -1,19 +1,26 @@
 #' La clase para interactuar con plantuml
-#' @title R6PlantUML
+#' @name Config
+#' @title R6Config
+#' @rdname Config
 #' @docType class
 #' @description  La descripcion.
 #'
-CONFIG = R6::R6Class("R6CONFIG",
-   public = list(
+CONFIG = R6::R6Class("R6CONFIG"
+   ,portable     = FALSE
+   ,lock_objects = TRUE
+   ,lock_class   = TRUE
+   ,public = list(
        #' @description Crea una instancia de la clase
        #' @details     Esta clase no puede ser instanciada
        #' @param ...  named values para definir la configuración
        #' @return La instancia del objeto
        initialize         = function( ...) {
 #          if (substr(as.character(sys.call(-1))[1], 1, 6) == "CONFIG") private$msg$err("E900", "CONFIG")
+         private$msg = umlr2.env$UMLR2Msg
           parms = unlist(list(...))
           if (sum(names(parms) == "") > 0) private$msg$err("R103")
           self$setConfig(...)
+
       }
       #' @description
       #'     Verifica la corrección de los datos de configuración de la clase.
@@ -232,7 +239,7 @@ CONFIG = R6::R6Class("R6CONFIG",
       )
       ,force = FALSE
       ,types  = c("png", "jpg", "svg")
-      ,msg = UMLR2Msg.getInstance()
+      ,msg = NULL
       ,checkType        = function (type) {
         if (!(type %in% private$types)) private$msg$err("R107")
       }

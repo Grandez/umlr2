@@ -1,32 +1,34 @@
-#' Genera una instancia unica de la clase de mensajes
-#' @export
-UMLR2Msg.getInstance = function() {
-    if (!exists("UMLRMsg")) {
-        cls = UMLR2MSG$new()
-        env = globalenv()
-        env$UMLR2Msg = cls
-    }
-    env$UMLR2Msg
-}
+# #' Genera una instancia unica de la clase de mensajes
+# #' @export
+# UMLR2Msg.getInstance = function() {
+#     if (!exists("UMLRMsg")) {
+#         cls = UMLR2MSG$new()
+#         env = globalenv()
+#         env$UMLR2Msg = cls
+#     }
+#     env$UMLR2Msg
+# }
 #' Clase con los mensajes de error
 #' @title UMLRMSG
 #' @docType class
 #' @description  Contiene los mensajes de error
 UMLR2MSG = R6::R6Class("R6UMLR2MSG"
-   ,public = list(
+    ,portable     = FALSE
+    ,lock_objects = TRUE
+    ,lock_class   = TRUE
+    ,public       = list(
        #' @description Consructor protegido
        #' @details Esta clase no puede ser instanciada
        #'          Es un sigleton gestionado por UMLRMsg.getInstance
        #' @return La instancia del objeto
        initialize         = function() {
-           call = as.character(sys.call(-2))
-           if (call != "UMLR2Msg.getInstance") self$plantErr("E900", "UMLR2SG")
+           # call = as.character(sys.call(-2))
+           # if (call != "UMLR2Msg.getInstance") self$plantErr("E900", "UMLR2SG")
        }
        #' @description Genera un mensaje desde la tabla de mensajes
        #' @param code Codigo de error
        #' @param newCode Si existe reemplaza al anterior
        #' @param ... Informacion necesaria para el mensaje concreto
-       #' @return El mensaje
        ,msg = function(code, ..., newCode=0) {
             private$mountMessage(code, ..., newCode)
        }
@@ -34,12 +36,12 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param code Codigo de aviso
        #' @param newCode Si existe reemplaza al anterior
        #' @param ... Informacion necesaria para el mensaje concreto
-       #' @return El aviso
        ,warning = function(code, ..., newCode=0) {
           warning(private$mountMessage(code, ..., newCode))
        }
        #' @description Genera un mensaje de error y lanza la excepcion
        #' @param code Codigo de error
+       #' @param data Datos del error
        #' @param newCode Si existe reemplaza al anterior
        #' @param ... Informacion necesaria para el mensaje concreto
        ,err = function(code, ..., data=NULL, newCode=0) {
@@ -75,8 +77,8 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
             stop(c)
         }
     )
-  ,private = list(
-       err2 = ""
+  ,private = list(classError = "UMLR2Err"
+      ,err2 = ""
       ,mountMessage = function(code, ..., newCode=0) {
        if (newCode != 0) {
          text = sprintf("UMLRE%03d - %s", newCode, private$msgErr[code])
@@ -96,6 +98,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,R010="Invalid call. Parameter missing"
        ,R011="Data provided can not be casted to S3PlantUML class"
        ,R012="%s is read only. Do exists a setter?"
+       ,R020="%s no es una instancia de clase"
        ,R101="JVM not found: %s"
        ,R102="Component not found: %s"
        ,R103="All values must be named"
@@ -130,7 +133,12 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,E110="Unable access to temporal directory"
        ,E111="Unable access to config directories"
        ,E200="InputDir must be set to store diagrams"
+    # Warnings
+       ,W510="Style/Template \'%s\' does not exists"
+    #
+       ,E810="\'object\' is not an instance of S4 or R6 Classes"
        ,E900="class %s is abstract"
+       ,E901="Method \'%s\' is an interface or it is virtual"
    )
   )
 )

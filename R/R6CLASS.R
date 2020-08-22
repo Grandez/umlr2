@@ -1,6 +1,9 @@
-#' Encapsula la informacion de un objeto de tipo R6
-#' @title R6CLASS
+#' La clase para interactuar con plantuml
+#' @title "R6 Class"
+#' @name "R6 Class"
+#' @rdname R6Class
 #' @docType class
+#' @description  La descripcion.
 R6CLASS = R6::R6Class("R6CLASS",
     public = list(
        #' @field name Nombre de la clase
@@ -17,21 +20,34 @@ R6CLASS = R6::R6Class("R6CLASS",
        #' @description Crea una instancia de la clase
        #' @param name  Nombre de la clase
        #' @param generator Objeto generados
-       #' @param detail Nivel de profundidad
-       #' @return La instancia del objeto
-       ,initialize = function(name, generator, detail, deep, type = 0) {
+       #' @param detail Nivel de detalle generado
+       #' @param deep   Nivel de profundidad
+       #' @param type   Tipo de clase
+       ,initialize = function(name, generator, detail, deep, type = ClassType$unknow) {
            self$name      = name
            self$generator = generator
            self$detail    = detail
            self$deep      = deep
            self$type      = type
        }
-       ,setType = function(type) {
-         self$type = bitwOr(self$type, type)
+       #' @description Establece el tipo de clase dentro de su contexto
+       #' @details El contexto indica si se ha analizado como clase heredada, clase padre, etc.
+       #' @param t  El tipo de la clase
+       ,setType = function(t) {
+         self$type = bitwOr(self$type, t)
        }
-       ,isClass      = function() as.logical(bitwAnd(self$type, 1))
-       ,isSuperclass = function() as.logical(bitwAnd(self$type, 2))
-       ,isSubclass   = function() as.logical(bitwAnd(self$type, 4))
+       #' @description Verifica si es una clase principal
+       #' @return TRUE si lo es
+       #'         FALSE si no
+       ,isClass      = function() as.logical(bitwAnd(self$type, ClassType$class))
+       #' @description Verifica si tiene activo el flag de superclase
+       #' @return TRUE si lo es
+       #'         FALSE si no
+       ,isSuperclass = function() as.logical(bitwAnd(self$type, ClassType$superClass))
+       #' @description Verifica si tiene activo el flag de subclase
+       #' @return TRUE si lo es
+       #'         FALSE si no
+       ,isSubclass   = function() as.logical(bitwAnd(self$type, ClassType$subClass))
        #' @description Agrega el padre (superclase)
        #' @param parent  Superclase
       ,addParent = function (parent) {
