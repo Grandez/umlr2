@@ -1,0 +1,181 @@
+---
+title: "Diagramas UML de clases RDocumenting R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diagramas UML de clases RDocumenting R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+LOCAL <- identical(Sys.getenv("R_LOCAL"), "TRUE")
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  purl = LOCAL
+)
+```
+
+```{r setup, echo = FALSE}
+
+library(UMLR2)
+umlr = UMLR$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+```
+
+# Intro
+
+El paquete provee una clase (**UMLR**) para generar definiciones UML de objetos R.
+Actualmente es posible procesar:
+
+- Clases R6
+- Clases S4 
+
+El proceso general consiste en crear un objeto **UMLR** y ejecutar el método uno de los siguientes métodos sobre una o un vector de de instancias de clases R:
+
+- plotClass
+
+# Parametros de control 
+
+El nivel de detalle y la información a generar se gestiona a través de los siguientes parámetros:
+
+- detail
+- deep
+
+## Nivel de detalle
+
+
+### parámetro _detail_
+
+
+ umlr$plotClass(c(uml, umlr), UMLShow$basic)
+
+
+simple
+
+
+ umlr$plotClass(c(uml, umlr), UMLShow$simple)
+
+
+
+con padres
+
+base = UMLShow$complete + UMLShow$superClasses
+ umlr$plotClass(c(uml, umlr), base)
+
+
+### parámetro _deep_
+completo
+
+
+base = UMLShow$complete + UMLShow$superClasses + UMLShow$subClasses
+umlr$plotClass(c(uml, umlr), base + UMLShow$classComplete, deep=10)
+
+
+
+
+UMLShow$
+
+# Casos de uso
+
+## Clase
+
+Supongamos la siguiente clase sencilla
+
+```{r, eval=TRUE}
+CLASS00 = R6::R6Class("R6CLASS00",
+ public = list(
+    initialize = function(...) { }
+   ,method00   = function()    { }
+ )
+ ,active  = list (
+     var00 = function(value) { }
+ )
+ ,private = list (
+      .var00    = NA
+     ,.method00 = function(data) {}
+ )
+)
+c00 = CLASS00$new()
+```
+
+En funcion del tipo de detalle requerido el gráfico mostrará mas o menos información
+
+| basic  | simple | complete |
+|:-:|:-:|:-:|
+| `r umlr$plotClass(c00, UMLShow$basic)` | `r umlr$plotClass(c00, UMLShow$simple)` | `r umlr$plotClass(c00, UMLShow$complete)` |
+
+Nótese que dado que la clase no hereda de ninguna superclase `basic` y `simple` son equivalentes
+
+Creemos otra clase que hereda de la anterior:
+
+```{r}
+CLASS10 = R6::R6Class("R6CLASS10", inherit=CLASS00,
+   public = list(
+        attr101 = NULL
+       ,attr102 = NULL
+       ,initialize = function() {}
+       ,finalize   = function() {}
+       ,method101   = function() {}
+   )
+   ,private = list(
+        .priv101   = 1
+       ,.method101 = function(dato) {}
+   )
+)
+c10 = CLASS10$new()
+```
+
+Es posible mostrar la información de las dos instancias pasándolas como un vector:
+
+`umlr$plotClass(c(c00, c10), detalle)`
+
+```{r, echo=FALSE}
+  group = c(c00, c10)
+```
+| basic  | simple | complete |
+|:-:|:-:|:-:|
+| `r umlr$plotClass(group, UMLShow$basic)`|`r umlr$plotClass(group, UMLShow$simple)`|`r umlr$plotClass(group, UMLShow$complete)`|
+
+### superclases
+
+```{r eval = LOCAL, echo=FALSE}
+ umlr$plotClass(c10, UMLShow$parents)
+```
+
+El detalle de cada grupo de clases XXXX
+```{r, echo = FALSE}
+graphsb = UMLShow$simple   + UMLShow$parents 
+graphcs = UMLShow$complete + UMLShow$parents + UMLShow$classSimple
+graphcc = UMLShow$complete + UMLShow$parents + UMLShow$classcomplete
+```
+
+
+| simple/basic  | complete/simple | complete/complete |
+|:-:|:-:|:-:|
+| `r umlr$plotClass(c10, graphsb)`|`r umlr$plotClass(c10, graphcs)`|`r umlr$plotClass(c10, graphcc)`|
+
+### subclases
+
+```{r eval = LOCAL, echo=FALSE}
+ umlr$plotClass(c10, UMLShow$parents)
+```
+
+El detalle de cada grupo de clases XXXX
+```{r, echo = FALSE}
+graphsb = UMLShow$simple   + UMLShow$parents 
+graphcs = UMLShow$complete + UMLShow$parents + UMLShow$classSimple
+graphcc = UMLShow$complete + UMLShow$parents + UMLShow$classcomplete
+```
+
+
+| simple/basic  | complete/simple | complete/complete |
+|:-:|:-:|:-:|
+| `r umlr$plotClass(c10, graphsb)`|`r umlr$plotClass(c10, graphcs)`|`r umlr$plotClass(c10, graphcc)`|
+
+### Completo
+
+TODO
+
+## Multiples clases
+
+Es posible combinar en un mismo diagrama las relaciones de un conjunto de clases

@@ -1,0 +1,14 @@
+__level__ __title__
+
+You can force the use of a black&white output using skinparam monochrome reverse command. This can be useful for black background environment.
+
+````
+`r ''````{r, eval=TRUE}
+1 + 1
+```
+````
+
+
+```{r ,eval =TRUE, echo=TRUE}
+  11 + 22
+```

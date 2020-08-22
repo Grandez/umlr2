@@ -1,0 +1,44 @@
+---
+title: "Test UMLR"
+author: "Javier Gonzalez"
+date: "22/8/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r init, include=FALSE}
+setwd("..")
+files.r = list.files("R", pattern="*\\.R$", full.names=TRUE, ignore.case=F)
+invisible(sapply(files.r, source))
+
+source("vignettes/sampleClasses.R")
+
+testData="@startuml\n[*]-->STATE1\n@enduml\n"
+print("Inicio")
+
+umlr = UMLR$new(plantuml="C:\\SDK\\plantuml\\plantuml.jar")
+```
+grafico
+
+```{r}
+umlr$addStyle("monochrome", TRUE)
+base = UMLShow$complete + UMLShow$subclasses + UMLShow$parents + UMLShow$classComplete
+umlr$plotClass(c10, base)
+```
+
+# umlr$plotClass(33, base)
+
+
+#rc = uml$checkInstallation()
+
+
+## monochrome
+print("Antes")
+
+# umlr$addStyle("monochrome", TRUE)
+
