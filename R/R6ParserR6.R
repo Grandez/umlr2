@@ -3,11 +3,11 @@
 #' @name ParserR6
 #' @rdname R6PARSERR6
 #' @docType class
-ParserR6 = R6::R6Class("R6PARSERR6"
-   , inherit = PARSER
-   , portable = FALSE
-   , lock_objects = TRUE
-   , lock_class = TRUE
+ParserR6 = R6::R6Class("PARSERR6"
+   ,inherit      = ParserBase
+   ,portable     = FALSE
+   ,lock_objects = TRUE
+   ,lock_class   = TRUE
    ,public = list(
       #' @description Crea una instancia de la clase
       #' @details **Esta clase no se puede instanciar**
@@ -23,7 +23,7 @@ ParserR6 = R6::R6Class("R6PARSERR6"
        #' @return La definicion del diagrama
       ,parse = function() {
           c0 = class(.object)[1]
-          p = R6CLASS$new(.generators[c0], c0, .detail, 0, 1)
+          p = RClass$new(.generators[c0], c0, .detail, 0, 1)
           private$.pend = list(p)
           names(private$.pend) = p$name
           process()
@@ -52,13 +52,13 @@ ParserR6 = R6::R6Class("R6PARSERR6"
           if (cls$deep > .maxDeep) return(FALSE)
           if (cls$name %in% names(.hecho)) return (FALSE)
 
-          if (isBasic()) return (parseOutput(cls))
-
+          #JGG if (isBasic()) return (parseOutput(cls))
+return (parseOutput(cls))
           # Clase heredada. R6 no tiene multiple herencia
           if (cls$deep < .maxDeep) {
               g = eval(base::parse(text=paste0(cls$name, "$get_inherit()")))
               if (!is.null(g) && incSuperClass()) {
-                  p = R6CLASS$new(.generators[g$classname], g$classname, detail, cls$deep + 1, 2)
+                  p = RClass$new(.generators[g$classname], g$classname, .detail, cls$deep + 1, 2)
                   addClass(p)
                   cls$addParent(p)
               }
@@ -123,7 +123,9 @@ ParserR6 = R6::R6Class("R6PARSERR6"
          if (public) cls$addBindings(eval(base::parse(text=paste0(cls$name, "$active"))))
       }
       ,getGenerators = function () {
+          pat = "[\\+\\-\\/\\*]"
           vars = ls(globalenv())
+          vars = vars[!grepl(pat, vars)] # Quitar operadores sobrecargados
           classes = lapply(vars, function(x) eval(base::parse(text=paste0("class(", x ,")"))))
           names(classes) = vars
           classes = unlist(classes)
@@ -147,7 +149,7 @@ ParserR6 = R6::R6Class("R6PARSERR6"
          # Cogemos los primeros
          if (length(clases) > 0) {
             hijos = unique(unlist(lapply(clases, function(x) x[[1]])))
-            hijos = lapply(hijos, function(x) R6CLASS$new(.generators[hijos], x, detail, cls$deep + 1, 4))
+            hijos = lapply(hijos, function(x) RClass$new(.generators[hijos], x, detail, cls$deep + 1, 4))
             names(hijos) = unique(unlist(lapply(hijos, function(x) x$name)))
             cls$addSubclasses(hijos, TRUE)
             addClass(hijos)
@@ -157,7 +159,7 @@ ParserR6 = R6::R6Class("R6PARSERR6"
          if (length(hijos) > 0) {
             hijos = unique(hijos)
             hijos = lapply(hijos, function(x) { pos = which(.generators == x)
-                                                R6CLASS$new(x, names(.generators)[pos], detail, cls$deep + 1)
+                                                RClass$new(x, names(.generators)[pos], detail, cls$deep + 1)
                                                })
             names(hijos) = unlist(lapply(hijos, function(x) x$name))
             cls$addSubclasses(hijos, TRUE)
@@ -180,7 +182,7 @@ ParserR6 = R6::R6Class("R6PARSERR6"
          if (length(hijos) > 0) {
             hijos = unique(hijos)
             hijos = lapply(hijos, function(x) { pos = which(.generators == x)
-            R6CLASS$new(x, names(.generators)[pos], detail, cls$deep + 1)})
+            RClass$new(x, names(.generators)[pos], detail, cls$deep + 1)})
             names(hijos) = unlist(lapply(hijos, function(x) x$name))
             cls$addSubclasses(hijos, FALSE)
             addClass(hijos)

@@ -17,20 +17,12 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
     ,lock_objects = TRUE
     ,lock_class   = TRUE
     ,public       = list(
-       #' @description Consructor protegido
-       #' @details Esta clase no puede ser instanciada
-       #'          Es un sigleton gestionado por UMLRMsg.getInstance
-       #' @return La instancia del objeto
-       initialize         = function() {
-           # call = as.character(sys.call(-2))
-           # if (call != "UMLR2Msg.getInstance") self$plantErr("E900", "UMLR2SG")
-       }
        #' @description Genera un mensaje desde la tabla de mensajes
        #' @param code Codigo de error
        #' @param newCode Si existe reemplaza al anterior
        #' @param ... Informacion necesaria para el mensaje concreto
-       ,msg = function(code, ..., newCode=0) {
-            private$mountMessage(code, ..., newCode)
+       msg = function(code, ..., newCode=0) {
+          private$mountMessage(code, ..., newCode)
        }
        #' @description Genera un aviso
        #' @param code Codigo de aviso
@@ -73,7 +65,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        #' @param ... Informacion necesaria para el mensaje concreto
        #' @return La instancia del objeto
        ,plantErr         = function(code, ..., newCode=0) {
-            c <- errorCondition(text, class=c("UMLR2Err", "error"))
+            c <- errorCondition(text, class=c("UMLRErr", "error"))
             stop(c)
         }
     )
@@ -89,8 +81,16 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        }
        text
      }
-     ,msgErr = c(
-        R001="Invalid value for %s"
+     ,msgErr = c(I000="Test message"
+       # Parametros y llamadas
+       ,E001="Parameter '%s' is mandatory"
+       ,E002="Invalid value for %s"
+       ,E003="Parameters are not an instance of any Class"
+       ,E004="All values must be named"
+
+       ,E106="COnfiguration parameters must be an string"
+
+
        ,R002="Invalid directory: %s"
        ,R003="Invalid parameter: %s"
        ,R005="Invalid flag: %s"
@@ -101,19 +101,20 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,R020="%s no es una instancia de clase"
        ,R101="JVM not found: %s"
        ,R102="Component not found: %s"
-       ,R103="All values must be named"
+
        ,R104="Incorrect configuration names: %s"
        ,R105="All configuration parameters must be named"
-       ,R106="COnfiguration parameters must be an string"
+
        ,R107="Invalid graphic format. Only png, jpg or svg are allowed"
-       ,R310="Flags must be character"
-       ,R311="Invalid flags: %s"
        ,R201="No info provided for diagram"
        ,R202="outputDir must be set"
        ,R203="force must be TRUE or FALSE"
        ,R204="This method requires a file"
        ,R205="Input file not found: %s"
        ,R206="Parameter %s must be set"
+       ,R310="Flags must be character"
+       ,R311="Invalid flags: %s"
+
        ,I001="Checking JVM machine \t"
        ,I002="Checking Graphviz \t\t"
        ,I003="Checking plantuml.jar \t"
@@ -127,7 +128,6 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,I015="\tCharset\t\t\t"
        ,I016="\tInput directory\t\t"
        ,I017="\tOutput directory\t"
-       ,E001="Error generating diagram"
        ,E101="Invalid file name: %s"
        ,E102="Reading file name: %s"
        ,E110="Unable access to temporal directory"
@@ -136,7 +136,7 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
     # Warnings
        ,W510="Style/Template \'%s\' does not exists"
     #
-       ,E810="\'object\' is not an instance of S4 or R6 Classes"
+       ,W810="\'object\' is not an instance of supported classes (ignored)"
        ,E900="class %s is abstract"
        ,E901="Method \'%s\' is an interface or it is virtual"
    )

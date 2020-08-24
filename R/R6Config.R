@@ -4,7 +4,7 @@
 #' @rdname Config
 #' @docType class
 #' @description  La descripcion.
-#'
+#' @export
 CONFIG = R6::R6Class("R6CONFIG"
    ,portable     = FALSE
    ,lock_objects = TRUE
@@ -16,11 +16,16 @@ CONFIG = R6::R6Class("R6CONFIG"
        #' @return La instancia del objeto
        initialize         = function( ...) {
 #          if (substr(as.character(sys.call(-1))[1], 1, 6) == "CONFIG") private$msg$err("E900", "CONFIG")
-         private$msg = umlr2.env$UMLR2Msg
+         # private$msg = umlr2.env$UMLR2Msg
           parms = unlist(list(...))
-          if (sum(names(parms) == "") > 0) private$msg$err("R103")
-          self$setConfig(...)
-
+          if (length(parms) > 0) {
+             if (sum(names(parms) == "") > 0) private$msg$err("E004")
+             if (!is.na(parms["config"])) {
+                 private$cfg = parms["config"]$config$getConfig()
+                 parms = parms[-match("config", names(parms))]
+             }
+          }
+          self$setConfig(parms)
       }
       #' @description
       #'     Verifica la corrección de los datos de configuración de la clase.
@@ -133,7 +138,7 @@ CONFIG = R6::R6Class("R6CONFIG"
          values = unlist(list(...))
 
          if (length(values) == 0) return()
-         if (!is.character(values[1])) private$msg$err("R106")
+         if (!is.character(values[1])) private$msg$err("E106")
          parms = names(values)
          if (sum(parms == "") > 0) private$msg$err("R105")
          flags = names(values) %in% names(private$cfg)
@@ -230,16 +235,21 @@ CONFIG = R6::R6Class("R6CONFIG"
    )
    ,private = list(
        cfg=list( jvm        = "java"
-                 ,plantuml  = "plantuml.jar"
+                 ,plantuml  = "c:/SDK/plantuml/plantuml.jar"
                  ,ext       = "uml"
                  ,type      = "png"
                  ,charset   = "utf-8"
+                 ,detail    = UMLShow$simple
+                 ,deep      = 1
                  ,inputDir  = ""    # Evitar Nulos
                  ,outputDir = ""    # Evitar Nulos
       )
       ,force = FALSE
       ,types  = c("png", "jpg", "svg")
       ,msg = NULL
+      ,copyConfig = function(config) {
+        private$cfg = config$getConfig()
+      }
       ,checkType        = function (type) {
         if (!(type %in% private$types)) private$msg$err("R107")
       }

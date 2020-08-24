@@ -3,7 +3,7 @@
 #' @name ParserS4
 #' @rdname R6PARSERS4
 #' @docType class
-ParserS4 = R6::R6Class("R6PARSERS4", inherit = PARSER, portable = FALSE, lock_objects = TRUE, lock_class = TRUE
+PARSERS4 = R6::R6Class("R6PARSERS4", inherit = PARSER, portable = FALSE, lock_objects = TRUE, lock_class = TRUE
    ,public = list(
       #' @description Crea una instancia de la clase
       #' @details **Esta clase no se puede instanciar**

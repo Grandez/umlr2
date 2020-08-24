@@ -4,12 +4,14 @@
 #' @rdname R6Class
 #' @docType class
 #' @description  La descripcion.
-R6CLASS = R6::R6Class("R6CLASS",
-    public = list(
-       #' @field name Nombre de la clase
-        name = NULL
+RClass = R6::R6Class("RCLASS"
+   ,inherit      = RComponent
+   ,portable     = FALSE
+   ,lock_objects = TRUE
+   ,lock_class   = TRUE
+   ,public = list(
        #' @field generator Generador de la clase
-       ,generator = NULL
+        generator = NULL
        #' @field detail Nivel de detalle
        ,detail      = 0
        #' @field deep Nivel de profundidad
