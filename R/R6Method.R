@@ -16,8 +16,11 @@ RMethod = R6::R6Class("RMETHOD"
         #' @param detail Nivel de detalle generado
         #' @param deep   Nivel de profundidad
         #' @param type   Tipo de clase
-        initialize = function(name, visibility) {
-            super$initialize(ObjType$Method, name, visbility)
+        initialize = function(name, signature, visibility) {
+            super$initialize(ObjType$Method, name, visibility)
+            if (!missing(signature)) {
+                pieces = strsplit(signature, "=")
+            }
         }
     )
 )

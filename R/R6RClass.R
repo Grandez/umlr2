@@ -75,8 +75,8 @@ RClass = R6::R6Class("RCLASS"
       #' @param fields  Los atributos a agregar
       #' @param public TRUE si los atributos son publicos
       ,addFields = function(fields, public) {
-         if (public)  private$publicFields  = fields
-         if (!public) private$privateFields = fields
+         if (public)  private$publicFields  = lapply(fields, function(x) RField$new(x, ScopeType$public))
+         if (!public) private$privateFields = lapply(fields, function(x) RField$new(x, ScopeType$private))
          invisible(self)
       }
       #' @description Agrega los metodos de la clase
@@ -89,9 +89,9 @@ RClass = R6::R6Class("RCLASS"
 
           if (public)  {
              # Separar getters y setters
-             private$publicMethods  = methods
+             private$publicMethods  = lapply(methods, function(x) RMethod$new(x, ScopeType$public))
           }
-          if (!public) private$privateMethods  = methods
+          if (!public) private$privateMethods  = lapply(methods, function(x) RMethod$new(x, ScopeType$private))
           invisible(self)
       }
       #' @description Agrega los _active bindings_ de la clase
