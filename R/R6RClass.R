@@ -17,20 +17,31 @@ RClass = R6::R6Class("RCLASS"
        #' @field deep Nivel de profundidad
        # Necesario para evitar la recursividad
        ,deep  = 0
-       #' @field type Tipo de clase (main, super, sub) 1 - 2 - 4
-       ,type = 0
+       #' @field source Origen de los datos
+       ,source = 0
        #' @description Crea una instancia de la clase
        #' @param name  Nombre de la clase
        #' @param generator Objeto generados
        #' @param detail Nivel de detalle generado
        #' @param deep   Nivel de profundidad
        #' @param type   Tipo de clase
-       ,initialize = function(name, generator, detail, deep, type = ClassType$unknow) {
+       ,initialize = function(name, generator="", detail=0, deep=0, type = ClassType$unknow) {
+           super$initialize(ObjType$class, name, type)
+           if (missing(name)) msg$err("E010")
            self$name      = name
            self$generator = generator
            self$detail    = detail
            self$deep      = deep
            self$type      = type
+       }
+       ,setDeep = function(deep, force = FALSE) {
+          if (force) {
+              self$deep = deep
+          }
+          else {
+            if (self$deep > deep) self$deep = deep
+          }
+          invisible(self)
        }
        #' @description Establece el tipo de clase dentro de su contexto
        #' @details El contexto indica si se ha analizado como clase heredada, clase padre, etc.
@@ -38,6 +49,10 @@ RClass = R6::R6Class("RCLASS"
        ,setType = function(t) {
          self$type = bitwOr(self$type, t)
        }
+       #' @description Verifica si es una clase principal
+       #' @return TRUE si lo es
+       #'         FALSE si no
+       ,isMain      = function() as.logical(bitwAnd(self$type, ClassType$main))
        #' @description Verifica si es una clase principal
        #' @return TRUE si lo es
        #'         FALSE si no
@@ -97,19 +112,29 @@ RClass = R6::R6Class("RCLASS"
       #' @description Devuelve la definicion de la clase en formato S3PlantUML
       #' @param detail  Nivel de detalle deseado
       #' @return La definicion de la clase en formato S3PlantUML
-      ,getClassDefinition = function(detail) {
+      ,definition = function() {
           privF = NULL
           privM = NULL
-          cdef = c(paste("class", self$name, "<<", self$generator, ">> {")
-                   ,private$getFieldsDefinition(TRUE)
-                   ,private$getBindings()
-          )
-          pubM = private$getMethodsDefinition(TRUE)
+          fields = private$getFieldsDefinition(TRUE)
+          binds  = private$getBindings()
+          pubM   = private$getMethodsDefinition(TRUE)
           if (bitwAnd(detail,UMLShow$complete) > 0) {
               privF = private$getFieldsDefinition(FALSE)
               privM = private$getMethodsDefinition(FALSE)
           }
-          c(cdef, privF, pubM, privM, "}")
+          body = c(fields, binds, pubM, privF, privM)
+
+          gen = ifelse (nchar(generator) > 0,  paste(lang$lstereo, self$generator, lang$rstereo),"")
+#          info = hasInfo()
+
+          begClass = lang$lblock
+          endClass = lang$rblock
+          if(length(body) == 1 && nchar(body[[1]]) == 0) {
+            begClass = NULL
+            endClass = NULL
+          }
+          cdef = c(paste(lang$class, self$name, gen, begClass))
+          c(cdef, body, endClass)
       }
       #' @description Devuelve la relacion de herencia si existe
       #' @return La relacion de herencia si existe
@@ -147,23 +172,20 @@ RClass = R6::R6Class("RCLASS"
             unlist(lapply(src, function(x) paste(prefix, x)))
         }
         ,getFieldsDefinition = function(public) {
-            a = paste0(ifelse(public, "+", "-"),"{field}")
+            a = paste0(ifelse(public, lang$public, lang$private),lang$field)
             fields = private$privateFields
             if (public) fields = private$publicFields
             private$.attrs(names(fields), a)
         }
         ,getMethodsDefinition = function(public) {
-            a = paste0(ifelse(public, "+", "-"),"{method}")
+            a = paste0(ifelse(public, lang$public, lang$private),lang$method)
             methods = private$privateMethods
             if (public) methods = private$publicMethods
             private$.attrs(names(methods), a)
         }
         ,getBindings          = function() {
             if (is.null(private$binds)) return ("")
-            #c(".. Active bindings ..",
-              unlist(lapply(private$binds, function(x) paste0("#//",x, "//")))
-          #)
+            unlist(lapply(private$binds, function(x) paste0(lang$lbinding, x, lang$rbinding)))
         }
-
     )
 )

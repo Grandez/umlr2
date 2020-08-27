@@ -14,10 +14,13 @@ UMLR = R6::R6Class("R6UMLR"
        #' @description Crea una instancia de la clase
        #' @param ...  named values para definir la configuración
        #' @return La instancia del objeto
-        initialize         = function( ...) {
+        initialize         = function(data=NULL, ...) {
             super$initialize(...)
             #files = Files$new()
             private$container = RCONTAINER$new()
+            if (!is.null(data)) {
+               if (!files$inline(data)) addClass(data)
+            }
         }
         #' @description Destructor de la clase
        ,finalize = function() {
@@ -34,9 +37,11 @@ UMLR = R6::R6Class("R6UMLR"
        #' @param data  Definición del diagrama o fichero con la misma
        #' @param name  Si los datos son inline, los almacena previamente
        #' @param force Fuerza a generar el diagrama aunque no haya cambiado
-       ,plot               = function(data=NULL, name=NULL, force=NULL) {
-               uml     = umlClass(object, detail, deep)
-               imgFile = .plant$genDiagram(uml, .parser$getSummary())
+       ,plot               = function(data=NULL, name=NULL) {
+          if (is.null(container)) return (NULL)
+          uml  = container$getDefinition()
+          summ = container$getSummary()
+               imgFile = plant$genDiagram(uml, summ)
                knitr::include_graphics(normalizePath(imgFile))
        }
        #' @description Genera un link al fichero de imagen con el diagrama
@@ -85,15 +90,35 @@ UMLR = R6::R6Class("R6UMLR"
        #' @return el objeto
        ,make             = function(diagram) {
        }
+       ,setMainClass     = function(mainClass) {
+          container$setMainClass(mainClass)
+          invisible(self)
+       }
        ,addClass         = function (cls, detail=NULL, deep = NULL) {
-           if (missing(cls))                            msg$err("E001", "cls")
+           if (missing(cls))     msg$err("E001", "cls")
+           if (length(cls) == 0) msg$err("E010")
+           if (is.object(cls))   cls = list(cls)
+
            if (!is.null(detail) && !is.numeric(detail)) msg$err("E002", "detail")
            if (!is.null(deep)   && !is.numeric(deep))   msg$err("E002", "deep")
-           addClasses(cls, detail=detail, deep=deep)
-       }
-       ,addClasses       = function (..., detail=NULL, deep=NULL) {
-           objs  = lapply(list(...), function(obj) PARSER$parse(obj, detail, deep))
-           container$add(objs)
+           if (is.null(detail)) detail = cfg$detail
+           if (is.null(deep))   deep   = cfg$deep
+
+           # si la clase es una instancia la analizamos
+           # si es una clase RCLASS no
+
+           for (idx in seq(1,length(cls))) {
+              if (is.character(cls[[idx]])) {
+                 # Fuerza a lista
+                 container$add(c(RClass$new(cls[[idx]])))
+              }
+              else {
+                 clase = cls[[idx]]
+                 if (class(clase)[1] != "RCLASS") clase = PARSER$parse(clase, detail, deep)
+                 container$add(clase)
+              }
+           }
+           invisible(self)
        }
        ,addPackage         = function (name, ..., style=NULL) {
            if (missing(name))                           msg$err("E001", "name")
@@ -104,6 +129,7 @@ UMLR = R6::R6Class("R6UMLR"
            else {
                container$add(RPackage$new(name, ..., style))
            }
+          invisible(self)
        }
        ,addNamespace         = function (name, ..., style=NULL) {
            if (missing(name))                           msg$err("E001", "name")
@@ -114,12 +140,23 @@ UMLR = R6::R6Class("R6UMLR"
            else {
                container$add(RNamespace$new(name, ..., style))
            }
+          invisible(self)
+       }
+       ,addRelation         = function (from, to, type) {
+          container$add(RRelation$new(from,to,type))
+          invisible(self)
+       }
+
+       ,addStyle         = function (style) {
+           container$add(style)
+          invisible(self)
        }
 
    )
    ,private = list(nada=NULL
-       ,files = NULL
+       ,files = Files$new()
        ,container = NULL
+       ,plant     = PLANTUML$new()
        ,makeImage = function(data, name, force) {
            files$setConfig(cfg)
            rc = files$prepareData(data, name, ifelse(is.null(force), cfg$getForce(), force))

@@ -41,11 +41,21 @@ UMLShow = .RUMLENUM(
     ,classComplete = 512
 )
 
+ObjType = list(
+   unknow    = 0
+  ,class     = 1
+  ,package   = 2
+  ,relation  = 4
+  ,namespace = 8
+)
+
 ClassType = .RUMLENUM(
-     unknow     = 0
-    ,class      = 1
-    ,superClass = 2
-    ,subClass   = 4
+     unknow     =  0
+    ,main       =  1
+    ,class      =  2
+    ,superClass =  4
+    ,subClass   =  8
+    ,named      = 16
 )
 
 PkgType = .RUMLENUM(
@@ -57,6 +67,40 @@ PkgType = .RUMLENUM(
     ,cloud     = 16
     ,database  = 32
 )
+
+RelType = list(
+     unknow      =  0
+    ,parent      =  1
+    ,child       =  2
+    ,composition =  4
+    ,aggregation =  8
+    ,use         = 16
+)
+
+origin = list(
+    unknow     = 0
+   ,instance   = 1  # Instancia de la clase
+   ,generator  = 2  # Definicion del generator
+   ,named      = 4  # Nombrada
+   ,source     = 8  # Desde el fichero fuente
+)
+
+lang = list( class       = "class"
+            ,package     = "package"
+            ,namespace   = "namespace"
+            ,lblock      = "{"
+            ,rblock      = "}"
+            ,lstereo     = "<<"
+            ,rstereo    = ">>"
+            ,parent      = "<|--"
+            ,composition = "*--"
+            ,aggregation = "o--"
+            ,private     = "-"
+            ,public      = "+"
+            ,field       = "{field}"
+            ,lbinding    = "#//"
+            ,rbinding    = "//"
+            )
 
 # Convertir con as.hexmode(numero)
 
@@ -211,11 +255,5 @@ Color = .RUMLENUM(
   ,White                                 = 0xFFFFFF
 )
 
-lang = list( class     = "class"
-            ,package   = "package"
-            ,namespace = "namespace"
-            ,lblock    = "{"
-            ,rblock    = "}"
-            )
 
 

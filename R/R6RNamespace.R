@@ -17,7 +17,7 @@ RNamespace = R6::R6Class("RNAMESPACE"
         #' @param deep   Nivel de profundidad
         #' @param type   Tipo de clase
         initialize = function(name, ..., style=NULL) {
-            super$initialize(name, ..., style=style)
+            super$initialize(ObjType$namespace, name, ..., style=style)
         }
     )
 )

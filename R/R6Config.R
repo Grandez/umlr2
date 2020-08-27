@@ -15,17 +15,9 @@ CONFIG = R6::R6Class("R6CONFIG"
        #' @param ...  named values para definir la configuración
        #' @return La instancia del objeto
        initialize         = function( ...) {
-#          if (substr(as.character(sys.call(-1))[1], 1, 6) == "CONFIG") private$msg$err("E900", "CONFIG")
-         # private$msg = umlr2.env$UMLR2Msg
-          parms = unlist(list(...))
-          if (length(parms) > 0) {
-             if (sum(names(parms) == "") > 0) private$msg$err("E004")
-             if (!is.na(parms["config"])) {
-                 private$cfg = parms["config"]$config$getConfig()
-                 parms = parms[-match("config", names(parms))]
-             }
-          }
-          self$setConfig(parms)
+#          if (substr(as.character(sys.call(-1))[1], 1, 6) == "CONFIG") msg$err("E900", "CONFIG")
+         # msg = umlr2.env$UMLR2Msg
+          setConfig(...)
       }
       #' @description
       #'     Verifica la corrección de los datos de configuración de la clase.
@@ -38,54 +30,54 @@ CONFIG = R6::R6Class("R6CONFIG"
       ,checkConfiguration = function(verbose=TRUE, first=FALSE) {
           txt = ""
           rc = TRUE
-          if (verbose) message(private$msg$msg("I010"))
-          if (verbose) message(private$msg$msg("I011"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I010"))
+          if (verbose) message(msg$msg("I011"), appendLF = FALSE)
           rp = (nchar(self$getJVM()) != 0)
-          if (verbose) message(paste(private$msg$ok(rp), "-", self$getJVM()))
+          if (verbose) message(paste(msg$ok(rp), "-", self$getJVM()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I012"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I012"), appendLF = FALSE)
           rp = (nchar(self$getPlantUML()) != 0)
-          if (verbose) message(paste(private$msg$ok(rp), "-", self$getPlantUML()))
+          if (verbose) message(paste(msg$ok(rp), "-", self$getPlantUML()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I013"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I013"), appendLF = FALSE)
           ext = self$getExt()
           rp = (nchar(ext) != 0)
           if (rp) rp = (substring(ext, 1, 1) != '.')
-          if (verbose) message(paste(private$msg$ok(rp), "-", self$getExt()))
+          if (verbose) message(paste(msg$ok(rp), "-", self$getExt()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I014"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I014"), appendLF = FALSE)
           rp = (self$getType() %in% private$types)
-          if (verbose) message(paste(private$msg$ok(rp), "-", self$getType()))
+          if (verbose) message(paste(msg$ok(rp), "-", self$getType()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I015"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I015"), appendLF = FALSE)
           rp = (nchar(self$getCharset()) != 0)
-          if (verbose) message(paste(private$msg$ok(rp), "-", self$getCharset()))
+          if (verbose) message(paste(msg$ok(rp), "-", self$getCharset()))
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I016"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I016"), appendLF = FALSE)
           dd = self$getInputDir()
           txt = ifelse(is.null(dd) || nchar(dd) == 0, "Not set", dd)
           rp  = ifelse(is.null(dd) || nchar(dd) == 0, TRUE, dir.exists(dd))
 
-          if (verbose) message(paste(private$msg$ok(rp), "-", txt))
+          if (verbose) message(paste(msg$ok(rp), "-", txt))
           txt = ""
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I017"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I017"), appendLF = FALSE)
           dd = self$getOutputDir()
           txt = ifelse(is.null(dd) || nchar(dd) == 0, "Not set", dd)
           rp = ifelse(is.null(dd) || nchar(dd) == 0, TRUE, dir.exists(dd))
-          if (verbose) message(paste(private$msg$ok(rp), "-", txt))
+          if (verbose) message(paste(msg$ok(rp), "-", txt))
           return (rc && rp)
       }
       #' @description Verifica la correccion de la instalacion. Es decir, si todos los
@@ -100,34 +92,34 @@ CONFIG = R6::R6Class("R6CONFIG"
           rc = self$checkConfiguration(verbose, first)
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I001"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I001"), appendLF = FALSE)
           rp = private$checkJVM()
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(msg$ok(rp))
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I002"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I002"), appendLF = FALSE)
           rp = private$checkDOT()
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(msg$ok(rp))
           rc = rc && rp
           if (first && !rc) return(rc)
 
-          if (verbose) message(private$msg$msg("I003"), appendLF = FALSE)
+          if (verbose) message(msg$msg("I003"), appendLF = FALSE)
           rp = file.exists(self$getPlantUML())
-          if (verbose) message(private$msg$ok(rp))
+          if (verbose) message(msg$ok(rp))
           rc = rc && rp
           if (first && !rc) return(rc)
 
           # Si ha fallado alguno anterior, fallaran estos
           if (rc) {
-              if (verbose) message(private$msg$msg("I004"), appendLF = FALSE)
+              if (verbose) message(msg$msg("I004"), appendLF = FALSE)
               rp = private$checkExecution()
-              if (verbose) message(private$msg$ok(rp))
+              if (verbose) message(msg$ok(rp))
               rc = rc && rp
               if (first && !rc) return(rc)
-              if (verbose) message(private$msg$msg("I005"), appendLF = FALSE)
+              if (verbose) message(msg$msg("I005"), appendLF = FALSE)
               rp = private$checkEnvironment()
-              if (verbose) message(private$msg$ok(rp))
+              if (verbose) message(msg$ok(rp))
           }
           rc && rp
       }
@@ -135,15 +127,19 @@ CONFIG = R6::R6Class("R6CONFIG"
       #' @param ...  named values para definir la configuracion
       #' @return La instancia del objeto
       ,setConfig         = function(...) {
-         values = unlist(list(...))
-
+          values = unlist(list(...))
+          if (length(values) == 0) return(invisible(self))
+          if (sum(names(values) == "") > 0) msg$err("E004")
+          if (!is.na(values["config"])) {
+              from = values["config"]
+              private$cfg = from$getConfig()
+              pos = match("config", names(values))
+              values = values[-pos]
+         }
          if (length(values) == 0) return()
-         if (!is.character(values[1])) private$msg$err("E106")
-         parms = names(values)
-         if (sum(parms == "") > 0) private$msg$err("R105")
          flags = names(values) %in% names(private$cfg)
          noFlags = names(values)[!flags]
-         if (length(noFlags) > 0) private$msg$err("R104", noFlags)
+         if (length(noFlags) > 0) msg$err("E104", noFlags)
 
          nm = names(values) # tipo
          eval(parse(text=paste0("private$cfg[\"", nm, "\"] = values[\"", nm, "\"]")))
@@ -151,28 +147,27 @@ CONFIG = R6::R6Class("R6CONFIG"
          invisible(self)
       }
       #' @description Obtiene los datos de configuracion
-      #' @family setters y getters
       #' @return Una lista con los datos de configuracion
-      ,getConfig         = function() { private$cfg }
+      ,getConfig         = function() { cfg }
       #####################################################
       # Getters and setters
       #####################################################
 
       #' @description si activo no hace cache
       #' @return El estado del flag
-      ,getForce      = function() private$force
+      ,getForce      = function() force
       #' @description Devuelve el nombre de la maquina virtual java
       #' @return El nombre del ejecutable de la maquina virtual java
-      ,getJVM       = function() private$cfg[["jvm"]]
+      ,getJVM       = function() cfg[["jvm"]]
       #' @description Devuelve la ubicacion del archivo jar plantuml.jar
       #' @family setters y getters
       #' @return La ubicacion del archivo jar plantuml.jar
-      ,getPlantUML  = function() private$cfg[["plantuml"]]
+      ,getPlantUML  = function() cfg[["plantuml"]]
       #' @description Devuelve la ubicacion del directorio por defecto de las definiciones de diagramas
       #' @param real Si TRUE devuelve el valor real del directorio, si no el indicado (puede ser NULL)
       #' @return La ubicacion del directorio por defecto de las definiciones de diagramas
       ,getInputDir  = function(real = FALSE) {
-           if (nchar(private$cfg[["inputDir"]]) > 0) return(private$cfg[["inputDir"]])
+           if (nchar(private$cfg[["inputDir"]]) > 0) return(cfg[["inputDir"]])
            if (real) return(tempdir)
            NULL
       }
@@ -180,41 +175,43 @@ CONFIG = R6::R6Class("R6CONFIG"
       #' @param real Si TRUE devuelve el valor real del directorio, si no el indicado (puede ser NULL)
       #' @return La ubicacion del directorio por defecto de las imagenes de diagramas
       ,getOutputDir  = function(real = FALSE) {
-          if (nchar(private$cfg[["outputDir"]]) > 0) return(private$cfg[["outputDir"]])
+          if (nchar(private$cfg[["outputDir"]]) > 0) return(cfg[["outputDir"]])
           if (real) return(tempdir)
           NULL
       }
       #' @description Devuelve la extensión por defecto para almacenar los ficheros de diagramas
       #' @family setters y getters
       #' @return La extensión por defecto para almacenar los ficheros de diagramas
-      ,getExt       = function() private$cfg[["ext"]]
+      ,getExt       = function() cfg[["ext"]]
       #' @description Devuelve el tipo de grafico por defecto
       #' @family setters y getters
       #' @return El tipo de grafico por defecto
-      ,getType      = function() private$cfg[["type"]]
+      ,getType      = function() cfg[["type"]]
       #' @description Devuelve el juego de caracteres por defecto
       #' @family setters y getters
       #' @return El juego de caracteres por defecto
-      ,getCharset   = function() private$cfg[["charset"]]
+      ,getCharset   = function() cfg[["charset"]]
+      ,getDetail    = function() cfg[["detail"]]
+      ,getDeep      = function() cfg[["deep"]]
       #' @description Establece la maquina virtual Java a utilizar
       #' @param value nombre de la maquina virtual
-      ,setJVM       = function(value) { private$cfg["jvm"]      = private$checkString(value); invisible(self) }
+      ,setJVM       = function(value) { private$cfg["jvm"]      = checkString(value); invisible(self) }
       #' @description Establece el paquete plantuml.jar a utilizar
       #' @param value el paquete plantuml.jar a utilizar
-      ,setPlantUML  = function(value) { private$cfg["plantuml"] = private$checkString(value); invisible(self) }
+      ,setPlantUML  = function(value) { private$cfg["plantuml"] = checkString(value); invisible(self) }
       #' @description Establece la extension por defecto para los ficheros de definicion de diagramas
       #'              Se ignora si el fichero en si mismo tiene extension
       #' @param value El paquete plantuml.jar a utilizar
-      ,setExt       = function(value) { private$cfg["ext"]      = private$checkString(value); invisible(self) }
+      ,setExt       = function(value) { private$cfg["ext"]      = checkString(value); invisible(self) }
       #' @description Establece el juego de caracteres por defecto
       #' @param value El juego de caracteres por defecto
-      ,setCharset   = function(value) { private$cfg["charset"]  = private$checkString(value); invisible(self) }
+      ,setCharset   = function(value) { private$cfg["charset"]  = checkString(value); invisible(self) }
       #' @description Establece el tipo de grafico por defecto
       #'              Valores permitidos: png, svg, png
       #' @param value El tipo de grafico por defecto
       ,setType      = function(value) {
-        private$checkString(value)
-        private$checkType(value)
+        checkString(value)
+        checkType(value)
         private$cfg["type"] = value
         invisible(self)
       }
@@ -222,14 +219,22 @@ CONFIG = R6::R6Class("R6CONFIG"
       #'              Puede ser relativo o absoluto
       #' @param value El directorio por defecto donde buscar los ficheros de definiciones
       ,setInputDir  = function(value=NULL) {
-          private$cfg["inputDir"] = ifelse(is.null(value), "", private$checkString(value))
+          private$cfg["inputDir"] = ifelse(is.null(value), "", checkString(value))
           invisible(self)
       }
       #' @description Establece directorio donde guardar los diagramas
       #'              Puede ser relativo o absoluto
       #' @param value El directorio donde guardar los ficheros de definiciones
       ,setOutputDir  = function(value=NULL) {
-        private$cfg["outputDir"] = ifelse(is.null(value), "", private$checkString(value))
+        private$cfg["outputDir"] = ifelse(is.null(value), "", checkString(value))
+        invisible(self)
+      }
+      ,setDetail  = function(value=NULL) {
+        private$cfg["detail"] = checkNumber(value)
+        invisible(self)
+      }
+      ,setDeep  = function(value=NULL) {
+        private$cfg["deep"] = checkNumber(value)
         invisible(self)
       }
    )
@@ -239,19 +244,19 @@ CONFIG = R6::R6Class("R6CONFIG"
                  ,ext       = "uml"
                  ,type      = "png"
                  ,charset   = "utf-8"
-                 ,detail    = UMLShow$simple
-                 ,deep      = 1
                  ,inputDir  = ""    # Evitar Nulos
                  ,outputDir = ""    # Evitar Nulos
+                 ,detail    = 1
+                 ,deep      = 1
       )
       ,force = FALSE
       ,types  = c("png", "jpg", "svg")
-      ,msg = NULL
+      ,msg = UMLR2MSG$new()
       ,copyConfig = function(config) {
         private$cfg = config$getConfig()
       }
       ,checkType        = function (type) {
-        if (!(type %in% private$types)) private$msg$err("R107")
+        if (!(type %in% private$types)) msg$err("R107")
       }
       #############################################################
       ### Checkers
@@ -312,14 +317,16 @@ CONFIG = R6::R6Class("R6CONFIG"
         TRUE
       }
       ,checkString      = function(value) {
-          if (missing(value) || is.null(value))
-              private$msg$err("R006")
-          if (!is.character(value) || length(value) != 1)
-              private$msg$err("R006")
+          if (missing(value) || is.null(value))           msg$err("E006")
+          if (!is.character(value) || length(value) != 1) msg$err("E006")
           trimmed = gsub("[[:space:]]", "", value)
-          if (nchar(trimmed) == 0)
-              private$msg$err("R006")
+          if (nchar(trimmed) == 0)                        msg$err("E006")
            trimmed
       }
+      ,checkNumber      = function(value) {
+          if (missing(value) || is.null(value)) msg$err("E006")
+          if (!is.numeric(value))               msg$err("E006")
+      }
+
    )
 )

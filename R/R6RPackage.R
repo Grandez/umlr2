@@ -17,7 +17,7 @@ RPackage = R6::R6Class("RPACKAGE"
         #' @param deep   Nivel de profundidad
         #' @param type   Tipo de clase
         initialize = function(name, ..., style=NULL) {
-            super$initialize(name, ..., style=style)
+            super$initialize(ObjType$package, name, ..., style=style)
         }
 
     )

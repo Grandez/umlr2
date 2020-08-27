@@ -4,7 +4,7 @@
 #' @description  La descripcion.
 
 #' @export
-umlr        = function(...) { UMLR$new(...)   }
+umlr        = function(data=NULL, ...) { UMLR$new(data=data, ...)    }
 #' @export
 umlr.config = function(...) { CONFIG$new(...) }
 
@@ -12,9 +12,9 @@ umlr.config = function(...) { CONFIG$new(...) }
 # Generics
 ############################################
 #' @export
-plot       = function(x) UseMethod("plot")
+plot       = function() UseMethod("plot")
 #' @export
-plot.UMLR2 = function(x) x$plot()
+plot.UMLR2 = function() x$plot()
 
 ############################################
 # Specifics
@@ -70,6 +70,37 @@ rnamespace = function(name=name, ..., style=NULL) {
 }
 
 #' @export
+rstyle = function(style) {
+    parms = list(...)
+    if (length(parms) > 0 && class(parms[[1]])[1] == "R6UMLR") {
+        stacks = sys.calls()
+        invocation = as.character(stacks[length(stacks)])
+        invocation = gsub("rclass(.,", "$addNamespace(", invocation, fixed=TRUE)
+        eval(parse(text=paste0("parms[[1]]", invocation)))
+    }
+    else {
+       sys.calls()[[1]]
+    }
+}
+
+#' @export
+rheader = function(style) {
+}
+
+#' @export
+rfooter = function(style) {
+}
+
+#' @export
+rinclude = function(style) {
+}
+
+#' @export
+rblock = function(style) {
+}
+
+
+#' @export
 rconfig = function(...) { CONFIG$new(...) }
 
 # La sobrecarga definida funciona con:
@@ -78,6 +109,7 @@ rconfig = function(...) { CONFIG$new(...) }
 # Asi que es necesario verificar quien es el objeto principal
 #' @export
 "+.UMLR2" <- function(e1, e2) { # ee=expression(e2)) {
+    browser()
     if ("UMLR2" %in% class(e1)) {
         obj = e1
         method = e2

@@ -59,62 +59,21 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,ok = function(value) {
          ifelse(as.logical(value), "OK", "KO")
        }
-       #' @description Genera un mensaje de error y lanza la excepcion
-       #' @param code Codigo de error
-       #' @param newCode Si existe reemplaza al anterior
-       #' @param ... Informacion necesaria para el mensaje concreto
-       #' @return La instancia del objeto
-       ,plantErr         = function(code, ..., newCode=0) {
-            c <- errorCondition(text, class=c("UMLRErr", "error"))
-            stop(c)
-        }
     )
   ,private = list(classError = "UMLR2Err"
       ,err2 = ""
       ,mountMessage = function(code, ..., newCode=0) {
-       if (newCode != 0) {
-         text = sprintf("UMLRE%03d - %s", newCode, private$msgErr[code])
-       }
-       else {
-         msg = sprintf(private$msgErr[code], ...)
-         text = sprintf("UMLR%s - %s", code, msg)
-       }
-       text
+          tCode = code
+          sCode = code
+          if (is.numeric(code)) {
+              tCode = "E000"
+              sCode = sprintf("P%03d", code)
+          }
+          msg = sprintf(private$msgErr[tCode], ...)
+          sprintf("UMLR%s - %s", code, msg)
      }
      ,msgErr = c(I000="Test message"
-       # Parametros y llamadas
-       ,E001="Parameter '%s' is mandatory"
-       ,E002="Invalid value for %s"
-       ,E003="Parameters are not an instance of any Class"
-       ,E004="All values must be named"
-
-       ,E106="COnfiguration parameters must be an string"
-
-
-       ,R002="Invalid directory: %s"
-       ,R003="Invalid parameter: %s"
-       ,R005="Invalid flag: %s"
-       ,R006="Invalid or missing value"
-       ,R010="Invalid call. Parameter missing"
-       ,R011="Data provided can not be casted to S3PlantUML class"
-       ,R012="%s is read only. Do exists a setter?"
-       ,R020="%s no es una instancia de clase"
-       ,R101="JVM not found: %s"
-       ,R102="Component not found: %s"
-
-       ,R104="Incorrect configuration names: %s"
-       ,R105="All configuration parameters must be named"
-
-       ,R107="Invalid graphic format. Only png, jpg or svg are allowed"
-       ,R201="No info provided for diagram"
-       ,R202="outputDir must be set"
-       ,R203="force must be TRUE or FALSE"
-       ,R204="This method requires a file"
-       ,R205="Input file not found: %s"
-       ,R206="Parameter %s must be set"
-       ,R310="Flags must be character"
-       ,R311="Invalid flags: %s"
-
+       # Informativos
        ,I001="Checking JVM machine \t"
        ,I002="Checking Graphviz \t\t"
        ,I003="Checking plantuml.jar \t"
@@ -128,11 +87,55 @@ UMLR2MSG = R6::R6Class("R6UMLR2MSG"
        ,I015="\tCharset\t\t\t"
        ,I016="\tInput directory\t\t"
        ,I017="\tOutput directory\t"
+
+       # Parametros y llamadas
+       ,E000="Generating diagram\n%s"
+       ,E001="Parameter '%s' is mandatory"
+       ,E002="Invalid value for %s"
+       ,E003="Parameters are not an instance of any Class"
+       ,E004="All parameters must be named"
+       ,E006="Invalid or missing value"
+       ,E010="Invalid call: Missing parameters"
+
+#       ,E106="Configuration parameters must be an string"
+
+       ,E104="Incorrect configuration names: %s"
+
+        # Acceso a ficheros y directorios
        ,E101="Invalid file name: %s"
        ,E102="Reading file name: %s"
        ,E110="Unable access to temporal directory"
        ,E111="Unable access to config directories"
        ,E200="InputDir must be set to store diagrams"
+
+       ,E900="This object is abstract: %s"
+       ,E910="This method is virtual: %s"
+
+
+       ,R002="Invalid directory: %s"
+       ,R003="Invalid parameter: %s"
+       ,R005="Invalid flag: %s"
+
+       ,R010="Invalid call. Parameter missing"
+       ,R011="Data provided can not be casted to S3PlantUML class"
+       ,R012="%s is read only. Do exists a setter?"
+       ,R020="%s no es una instancia de clase"
+       ,R101="JVM not found: %s"
+       ,R102="Component not found: %s"
+
+
+
+
+       ,R107="Invalid graphic format. Only png, jpg or svg are allowed"
+       ,R201="No info provided for diagram"
+       ,R202="outputDir must be set"
+       ,R203="force must be TRUE or FALSE"
+       ,R204="This method requires a file"
+       ,R205="Input file not found: %s"
+       ,R206="Parameter %s must be set"
+       ,R310="Flags must be character"
+       ,R311="Invalid flags: %s"
+
     # Warnings
        ,W510="Style/Template \'%s\' does not exists"
     #

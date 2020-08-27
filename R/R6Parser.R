@@ -6,6 +6,7 @@
 #' @docType class
 #' @description  Clase base para los parsers
 PARSER = R6::R6Class("R6PARSER"
+    ,inherit      = UMLR2Base
     ,portable     = FALSE
     ,lock_objects = FALSE
     ,lock_class   = FALSE
@@ -67,24 +68,6 @@ PARSER = R6::R6Class("R6PARSER"
 
       }
 
-        ,generateLayers = function() {
-            l = lapply(seq(1,length(.hecho)), function(x) .hecho[[x]]$deep)
-            names(l) = names(.hecho)
-            levels = unlist(l)
-            ll = sapply(seq(0,max(levels)), function(x) levels[levels == x], USE.NAMES = TRUE)
-            # Solo cuando hay mas de una clase
-            ll = ll[sapply(ll, function(x) length(x) > 1)]
-            classes = lapply(ll, function (x) paste("   class ", names(x), collapse="\n"))
-            layers = lapply(classes, function(x) paste("together {\n", x, "\n}\n", collapse="\n"))
-            unlist(layers)
-
-        }
-        ,summary = function() {
-            classes      = unlist(sapply(.hecho, function(x) if (x$isClass())      x$.generator))
-            subclasses   = unlist(sapply(.hecho, function(x) if (x$isSubclass())   x$.generator))
-            superclasses = unlist(sapply(.hecho, function(x) if (x$isSuperclass()) x$.generator))
-            private$summ = list(classes=classes, subclasses=subclasses, superclasses=superclasses)
-        }
         ,checkObject = function(object) {
            # Si es un unico objeto deberia tener class informado
            # si no es un objeto, deberia tener una longitud mayor que 1
@@ -105,14 +88,14 @@ PARSER = R6::R6Class("R6PARSER"
 
     )
 )
-PARSER$parse = function(object, detail=0, deep=0) {
+PARSER$parse = function(object, detail=NULL, deep=NULL) {
     if (isS4(object))      return (ParserS4$new(object, detail, deep)$parse())
     if (R6::is.R6(object)) return (ParserR6$new(object, detail, deep)$parse())
     if (is.environment(object)) {
         if (isS4(object$self))      return (ParserS4$new(object$self, detail, deep)$parse())
         if (R6::is.R6(object$self)) return (ParserR6$new(object$self, detail, deep)$parse())
      }
-     msg$warning("W810")
+#     msg$warning("W810")
      NULL
 }
 
