@@ -1,0 +1,7 @@
+
+! ERROR: GUI framework cannot be initialized.
+! ERROR: Info: 
+! ERROR: Source: Libraries\MiKTeX\UI\Qt\mikuiqt.cpp
+! ERROR: Line: 73
+
+! Sorry, but C:\SDK\Latex\miktex\bin\x64\pdflatex.exe did not succeed.

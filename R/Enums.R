@@ -35,6 +35,8 @@ UMLShow = .RUMLENUM(
      basic         =   0   # Solo los datos publicos propios y heredados
     ,simple        =   1   # Solo los datos publicos propios
     ,complete      =   2   # Info privada
+    ,signature     =   4   # Signatura
+    ,defaults      =   8   # Signatura con valores por defecto
     ,superClasses  =  16   # Padre si existe
     ,subClasses    =  32   # Clases usadas si existen
     ,classSimple   = 256   #
@@ -42,11 +44,13 @@ UMLShow = .RUMLENUM(
 )
 
 ObjType = list(
-   unknow    = 0
-  ,class     = 1
-  ,package   = 2
-  ,relation  = 4
-  ,namespace = 8
+   unknow    =  0
+  ,class     =  1
+  ,package   =  2
+  ,relation  =  4
+  ,namespace =  8
+  ,field     = 16
+  ,method    = 32
 )
 
 ClassType = .RUMLENUM(
@@ -84,6 +88,24 @@ origin = list(
    ,named      = 4  # Nombrada
    ,source     = 8  # Desde el fichero fuente
 )
+
+ScopeType = list(
+   uknown    = 0
+  ,private   = 1
+  ,protected = 2
+  ,public    = 4
+  ,package   = 8
+
+)
+
+# note left
+#   This is **bold**
+#   This is //italics//
+#   This is ""monospaced""
+#   This is --stroked--
+#   This is __underlined__
+#   This is ~~waved~~
+# end note
 
 lang = list( class       = "class"
             ,package     = "package"

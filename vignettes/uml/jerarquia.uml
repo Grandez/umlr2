@@ -1,0 +1,11 @@
+@startuml
+hide empty members
+Class000 <|-- Class010
+Class010 <|-- Class100
+Class100 *--  Class200
+Class100 o--  Class201
+Class200 *--  Class300
+Class200 o--  Class301
+Class201 *--  Class302
+Class201 o--  Class303
+@enduml

@@ -75,6 +75,7 @@ return (parseOutput(cls))
           TRUE
       }
       ,parseOutput = function(cls) {
+         browser()
          if (cls$deep > 0) return (TRUE)
          data = trimws(capture.output(.object))
          idx = grep("Public:", data, ignore.case=T)
